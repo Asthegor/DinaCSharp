@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace DinaFramework.Services
+namespace DinaCSharp.Services
 {
     /// <summary>
     /// Fournit une implémentation simple pour la localisation de services, permettant d'enregistrer, de récupérer et de supprimer des services à l'aide de clés uniques.

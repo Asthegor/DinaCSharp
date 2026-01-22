@@ -1,10 +1,10 @@
-﻿using DinaFramework.Services;
+﻿using DinaCSharp.Services;
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DinaFramework.Inputs
+namespace DinaCSharp.Inputs
 {
     /// <summary>
     /// Représente le contrôleur d'un joueur, permettant de gérer les liaisons 

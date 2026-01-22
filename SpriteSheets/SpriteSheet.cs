@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 using System.Collections.Generic;
 
-namespace DinaFramework.SpriteSheets
+namespace DinaCSharp.SpriteSheets
 {
     /// <summary>
     /// Représente une feuille de sprite (spritesheet) contenant une texture et un ensemble de régions nommées.

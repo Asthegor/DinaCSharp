@@ -1,5 +1,6 @@
-﻿using DinaFramework.Core;
-using DinaFramework.Interfaces;
+﻿using DinaCSharp.Core;
+using DinaCSharp.Events;
+using DinaCSharp.Interfaces;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -8,12 +9,12 @@ using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 
-namespace DinaFramework.Graphics
+namespace DinaCSharp.Graphics
 {
     /// <summary>
     /// Représente un champ de saisie de texte interactif, permettant à l'utilisateur de saisir du texte.
     /// </summary>
-    public class InputText : IUpdate, IDraw, IVisible, IElement, IColor, IPosition, IDimensions
+    public class InputText : IUpdate, IDraw, IVisible, IElement, IColor, IPosition, IDimensions, IDisposable
     {
         private const float DELAY_KEY_STROKE = 0.5f;
         private const float REPEAT_INTERVAL = 0.25f;  // Intervalle entre les répétitions
@@ -32,7 +33,7 @@ namespace DinaFramework.Graphics
 
         private MouseState _oldMouseState;
         private KeyboardState _oldKeyboardState;
-
+        private bool _disposed;
         private readonly Dictionary<Keys, float> _keyTimers = [];
 
         /// <summary>
@@ -67,7 +68,11 @@ namespace DinaFramework.Graphics
             _onlyDigit = onlyDigit;
             _offset = offset;
 
-            _panel = new Panel(Vector2.Zero, dimensions, backgroundcolor, bordercolor, thickness);
+            _panel = new Panel(Vector2.Zero - offset * 2 - new Vector2(thickness * 2), 
+                               dimensions + offset * 2 + new Vector2(thickness * 2), 
+                               backgroundcolor, bordercolor, thickness)
+            { Visible = true };
+
             _placeHolder = new Text(font, placeholder, placeholdercolor, _offset);
             _text = new Text(font, content, color, _offset);
             Vector2 textPos = offset + new Vector2(0, (dimensions.Y - _placeHolder.Dimensions.Y) / 2);
@@ -76,6 +81,7 @@ namespace DinaFramework.Graphics
             if (dimensions == default)
             {
                 _panel.Dimensions = _placeHolder.Dimensions + _offset * 2;
+                _panel.Position -= _offset;
                 _text.Dimensions = _placeHolder.Dimensions;
             }
 
@@ -97,6 +103,8 @@ namespace DinaFramework.Graphics
             Position = position;
 
             _isActive = false;
+
+            Visible = true;
         }
         /// <summary>
         /// Texte contenu dans le champ de texte.
@@ -312,6 +320,35 @@ namespace DinaFramework.Graphics
         private void UpdateCursorPosition()
         {
             _cursor.Position = _text.Position + new Vector2(_text.TextDimensions.X + 1, 0);
+        }
+
+        /// <summary>
+        /// Libère les ressources utilisées par le InputText.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Désabonne tous les événements.
+        /// </summary>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed)
+                return;
+
+            if (disposing)
+            {
+                _panel.Dispose();
+                _placeHolder.Dispose();
+                _text.Dispose();
+                _cursor.Dispose();
+
+                _keyTimers.Clear();
+            }
+            _disposed = true;
         }
     }
 }

@@ -4,7 +4,7 @@ using System;
 using System.IO;
 using System.Reflection;
 
-namespace DinaFramework.Assemblies
+namespace DinaCSharp.Assemblies
 {
     /// <summary>
     /// Fournit des méthodes pour charger les assemblages satellites basés sur les ressources localisées.

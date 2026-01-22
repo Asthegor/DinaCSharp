@@ -1,4 +1,4 @@
-﻿namespace DinaFramework.Inputs
+﻿namespace DinaCSharp.Inputs
 {
     /// <summary>
     /// Classe abstraite représentant une touche de contrôleur. Utilisez l'une des classes dérivées : KeyboardKey, GamepadButton.

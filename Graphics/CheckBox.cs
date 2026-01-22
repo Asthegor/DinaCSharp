@@ -1,9 +1,9 @@
-﻿using DinaFramework.Core;
-using DinaFramework.Enums;
-using DinaFramework.Events;
-using DinaFramework.Extensions;
-using DinaFramework.Interfaces;
-using DinaFramework.Services;
+﻿using DinaCSharp.Core;
+using DinaCSharp.Enums;
+using DinaCSharp.Events;
+using DinaCSharp.Extensions;
+using DinaCSharp.Interfaces;
+using DinaCSharp.Services;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -11,12 +11,12 @@ using Microsoft.Xna.Framework.Input;
 
 using System;
 
-namespace DinaFramework.Graphics
+namespace DinaCSharp.Graphics
 {
     /// <summary>
     /// Classe représentant une case à cocher graphique interactive.
     /// </summary>
-    public class CheckBox : Base, IUpdate, IDraw, IVisible, ICopyable<CheckBox>, ILocked
+    public class CheckBox : Base, IUpdate, IDraw, IVisible, ICopyable<CheckBox>, IUIStateful
     {
         private Rectangle _checkBoxRect;
         private Texture2D? _checkedTexture;
@@ -47,7 +47,7 @@ namespace DinaFramework.Graphics
         /// <param name="position">Position de la case à cocher.</param>
         /// <param name="dimensions">Dimensions de la case à cocher.</param>
         /// <param name="zorder">Ordre de dessin de la case.</param>
-        public CheckBox(Vector2 position, Vector2 dimensions, Texture2D uncheckedTexture, Texture2D checkedTexture, int zorder = 0) :
+        public CheckBox(Texture2D checkedTexture, Texture2D uncheckedTexture, Vector2 position, Vector2 dimensions, int zorder = 0) :
             base(position, dimensions, zorder)
         {
             _uncheckedTexture = uncheckedTexture;
@@ -60,6 +60,7 @@ namespace DinaFramework.Graphics
             LockedColor = Color.White * 0.75f;
             Visible = true;
             State = CheckBoxState.Unchecked;
+            UIState = UIState.Normal;
         }
         /// <summary>
         /// Position de la case à cocher.
@@ -93,7 +94,7 @@ namespace DinaFramework.Graphics
         /// <summary>
         /// Indique si la case à cocher est verrouillée.
         /// </summary>
-        public bool Locked { get; set; }
+        public UIState UIState { get; set; }
         /// <summary>
         /// Couleur à utiliser lorsque la case est verrouillée.
         /// </summary>
@@ -102,11 +103,20 @@ namespace DinaFramework.Graphics
         /// État actuel de la case à cocher (cochée ou non cochée).
         /// </summary>
         public CheckBoxState State { get; set; }
+        /// <summary>
+        /// Couleur à utiliser quand la case est survolée/focusée.
+        /// </summary>
+        public Color HoverColor { get; set; }
 
         /// <summary>
         /// Événement déclenché lorsqu'on clique sur la case à cocher. Utile pour réagir immédiatement au changement d'état par l'utilisateur.
         /// </summary>
         public event EventHandler<CheckBoxEventArgs>? OnClicked;
+        /// <summary>
+        /// Événement déclenché lorsque la case à cocher est survolée.
+        /// </summary>
+        public event EventHandler<CheckBoxEventArgs>? OnHovered;
+
         /// <summary>
         /// Obtient ou définit l'état coché de la case. True si la case est cochée, false sinon.
         /// Cette propriété simplifie l'accès à l'état en évitant de manipuler l'énumération CheckBoxState directement.
@@ -141,16 +151,34 @@ namespace DinaFramework.Graphics
         public void Update(GameTime gametime)
         {
             MouseState ms = Mouse.GetState();
-            if (!Locked)
+            if (UIState == UIState.Locked)
             {
+                _oldMouseState = ms;
+                return;
+            }
+
+            bool IsMouseOver = _checkBoxRect.Contains(new Point(ms.X, ms.Y));
+
+            if (IsMouseOver)
+            {
+                if (ms.LeftButton == ButtonState.Pressed)
+                    UIState = UIState.Pressed;
+                else
+                {
+                    OnHovered?.Invoke(this, new CheckBoxEventArgs(this));
+                    UIState = UIState.Hovered;
+                }
+
                 if (_oldMouseState.LeftButton == ButtonState.Pressed && ms.LeftButton == ButtonState.Released)
                 {
-                    if (_checkBoxRect.Contains(new Point(ms.X, ms.Y)))
-                    {
-                        IsChecked = !IsChecked; // on inverse l'état
-                        OnClicked?.Invoke(this, new CheckBoxEventArgs(this));
-                    }
+                    IsChecked = !IsChecked; // on inverse l'état
+                    OnClicked?.Invoke(this, new CheckBoxEventArgs(this));
                 }
+            }
+            else
+            {
+                if (UIState != UIState.Normal)
+                    UIState = UIState.Normal;
             }
             _oldMouseState = ms;
         }
@@ -166,8 +194,25 @@ namespace DinaFramework.Graphics
                 return;
 
             Texture2D? texture = State == CheckBoxState.Checked ? _checkedTexture : _uncheckedTexture;
-            Color color = Locked ? LockedColor
-                                 : (State == CheckBoxState.Checked ? CheckedColor : UncheckedColor);
+
+            Color color;
+
+            switch (UIState)
+            {
+                case UIState.Locked:
+                    color = LockedColor;
+                    break;
+                case UIState.Hovered:
+                case UIState.Pressed:
+                    color = HoverColor;
+                    break;
+                case UIState.Normal:
+                    color = State == CheckBoxState.Checked ? CheckedColor : UncheckedColor;
+                    break;
+                default:
+                    color = UncheckedColor;
+                    break;
+            }
 
             bool filled = State == CheckBoxState.Checked && texture == null;
 
@@ -197,7 +242,8 @@ namespace DinaFramework.Graphics
                 State = State,
                 Visible = Visible,
                 ZOrder = ZOrder,
-                Locked = Locked,
+                UIState = UIState,
+                HoverColor = HoverColor,
                 LockedColor = LockedColor,
             };
         }

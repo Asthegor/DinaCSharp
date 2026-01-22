@@ -1,12 +1,12 @@
-﻿using DinaFramework.Interfaces;
-using DinaFramework.Services;
+﻿using DinaCSharp.Interfaces;
+using DinaCSharp.Services;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 using System;
 
-namespace DinaFramework.Graphics
+namespace DinaCSharp.Graphics
 {
     /// <summary>
     /// Représente une ligne graphique configurable avec une position de départ, une position de fin (ou une distance et un angle), une épaisseur et une couleur.

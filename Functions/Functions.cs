@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Threading.Tasks;
 
-namespace DinaFramework.Functions
+namespace DinaCSharp.Functions
 {
     /// <summary>
     /// Fournit des fonctions utilitaires globales pour la manipulation des chaînes de caractères.

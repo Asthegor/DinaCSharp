@@ -1,7 +1,7 @@
-﻿using DinaFramework.Extensions;
-using DinaFramework.Graphics;
-using DinaFramework.Interfaces;
-using DinaFramework.Services;
+﻿using DinaCSharp.Extensions;
+using DinaCSharp.Graphics;
+using DinaCSharp.Interfaces;
+using DinaCSharp.Services;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -11,12 +11,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace DinaFramework.Core
+namespace DinaCSharp.Core
 {
     /// <summary>
     /// Représente un groupe d'éléments, gérant leur affichage, visibilité, couleur et interactions.
     /// </summary>
-    public class Group : Base, IDraw, IVisible, IEnumerable<IElement>, ICollide, IUpdate, IColor, IClickable, IHovered
+    public class Group : Base, IDraw, IVisible, IEnumerable<IElement>, ICollide, IUpdate, IColor, IClickable, IHovered, IDisposable
     {
         private readonly List<IElement> _elements = [];
         private int index;
@@ -27,6 +27,7 @@ namespace DinaFramework.Core
         private IDrawingElement? _title;
         private Rectangle? _titleRect;
         private bool _hovered;
+        private bool _disposed;
 
         /// <summary>
         /// Initialise une nouvelle instance de la classe Group avec les propriétés spécifiées.
@@ -469,6 +470,59 @@ namespace DinaFramework.Core
                 if (elem is IUpdate uelem)
                     uelem.Update(gametime);
             }
+        }
+
+        /// <summary>
+        /// Simule un clic gauche sur le Group et le transmet à tous les éléments qu'il contient.
+        /// </summary>
+        public void LeftClick()
+        {
+            foreach(var elem in _elements)
+            {
+                if (elem is IClickable celem)
+                    celem.LeftClick();
+            }
+        }
+
+        /// <summary>
+        /// Simule un clic droit sur le Group et le transmet à tous les éléments qu'il contient
+        /// </summary>
+        public void RightClick()
+        {
+            foreach (var elem in _elements)
+            {
+                if (elem is IClickable celem)
+                    celem.RightClick();
+            }
+        }
+
+        /// <summary>
+        /// Libère les ressources utilisées par le groupe et désabonne tous les événements.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Libère les ressources managées et non managées.
+        /// </summary>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed)
+                return;
+
+            if (disposing)
+            {
+                foreach(var element in _elements)
+                {
+                    if (element is IDisposable disposable)
+                        disposable.Dispose();
+                }
+               _elements.Clear();
+            }
+            _disposed = true;
         }
     }
 }

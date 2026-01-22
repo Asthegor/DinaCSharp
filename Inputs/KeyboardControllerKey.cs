@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework.Input;
 
-namespace DinaFramework.Inputs
+namespace DinaCSharp.Inputs
 {
     /// <summary>
     /// Représente une touche de contrôleur basée sur une touche de clavier.

@@ -1,10 +1,10 @@
-﻿using DinaFramework.Interfaces;
+﻿using DinaCSharp.Interfaces;
 
 using Microsoft.Xna.Framework;
 
 using System;
 
-namespace DinaFramework.Core
+namespace DinaCSharp.Core
 {
     /// <summary>
     /// Classe abstraite de base représentant un élément avec une position, des dimensions et un ordre d'affichage.
@@ -20,24 +20,24 @@ namespace DinaFramework.Core
         /// </summary>
         public int ZOrder
         {
-            get { return _zorder; }
-            set { _zorder = value; }
+            get => _zorder;
+            set => _zorder = value;
         }
         /// <summary>
         /// Position de l'élément dans l'espace.
         /// </summary>
         public virtual Vector2 Position
         {
-            get { return _position; }
-            set { _position = value; }
+            get => _position;
+            set => _position = value;
         }
         /// <summary>
         /// Dimensions de l'élément.
         /// </summary>
         public virtual Vector2 Dimensions
         {
-            get { return _dimensions; }
-            set { _dimensions = value; }
+            get => _dimensions;
+            set => _dimensions = value;
         }
 
         internal Base(Vector2 position = new Vector2(), Vector2 dimensions = new Vector2(), int zorder = 0)

@@ -1,6 +1,7 @@
-﻿using DinaFramework.Core;
-using DinaFramework.Enums;
-using DinaFramework.Interfaces;
+﻿using DinaCSharp.Core;
+using DinaCSharp.Enums;
+using DinaCSharp.Events;
+using DinaCSharp.Interfaces;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -9,12 +10,12 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 
-namespace DinaFramework.Graphics
+namespace DinaCSharp.Graphics
 {
     /// <summary>
     /// Classe représentant une barre de progression.
     /// </summary>
-    public class ProgressBar : Base, IDraw, IUpdate, IVisible, ICopyable<ProgressBar>
+    public class ProgressBar : Base, IPosition, IDraw, IUpdate, IVisible, ICopyable<ProgressBar>, IDisposable
     {
         private ProgressBarType _pbtype;
         private bool _visible;
@@ -34,6 +35,7 @@ namespace DinaFramework.Graphics
         private float _delay;
         private float _increment;
         private bool _autoIncrement;
+        private bool _disposed;
 
         /// <summary>
         /// Initialise une nouvelle instance de la classe ProgressBar avec un fond de couleur et une bordure.
@@ -58,8 +60,6 @@ namespace DinaFramework.Graphics
             Value = value;
             ZOrder = zorder;
             _pbtype = ProgressBarType.Color;
-            _rectangles[0] = new Rectangle(position.ToPoint(), dimensions.ToPoint()); // Border
-            _rectangles[1] = new Rectangle(position.ToPoint(), dimensions.ToPoint()); // Fond
             SetColors(frontColor, borderColor, backColor, borderThickness);
             Position = position;
             Dimensions = dimensions;
@@ -209,7 +209,7 @@ namespace DinaFramework.Graphics
         /// <summary>
         /// Position du panneau.
         /// </summary>
-        public new Vector2 Position
+        public override Vector2 Position
         {
             get => base.Position;
             set
@@ -820,6 +820,31 @@ namespace DinaFramework.Graphics
                 ZOrder = ZOrder,
             };
         }
+
+        /// <summary>
+        /// Libère les ressources utilisées par la ProgressBar.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Désabonne tous les événements.
+        /// </summary>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed)
+                return;
+
+            if (disposing)
+            {
+                _textures.Clear();
+            }
+            _disposed = true;
+        }
+
         private ProgressBar() { }
     }
 }

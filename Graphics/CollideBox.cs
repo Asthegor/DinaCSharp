@@ -1,10 +1,10 @@
-﻿using DinaFramework.Interfaces;
+﻿using DinaCSharp.Interfaces;
 
 using Microsoft.Xna.Framework;
 
 using System;
 
-namespace DinaFramework.Graphics
+namespace DinaCSharp.Graphics
 {
     /// <summary>
     /// Classe représentant un rectangle de collision pour la gestion des interactions.

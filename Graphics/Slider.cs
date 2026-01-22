@@ -1,9 +1,9 @@
 ﻿#nullable enable
 
-using DinaFramework.Core;
-using DinaFramework.Enums;
-using DinaFramework.Events;
-using DinaFramework.Interfaces;
+using DinaCSharp.Core;
+using DinaCSharp.Enums;
+using DinaCSharp.Events;
+using DinaCSharp.Interfaces;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -11,16 +11,17 @@ using Microsoft.Xna.Framework.Input;
 
 using System;
 
-namespace DinaFramework.Graphics
+namespace DinaCSharp.Graphics
 {
     /// <summary>
     /// Composant graphique représentant un slider (curseur) permettant de sélectionner une valeur dans une plage donnée.
     /// Supporte le glissement du curseur ainsi que l’incrément/décrément par clic sur la piste.
     /// Prend en charge différentes directions de progression via l’enum ProgressDirection.
     /// </summary>
-    public class Slider : Base, IGameObject
+    public class Slider : Base, IGameObject, IDisposable
     {
         private static Slider? _capturedSlider;
+        private bool _disposed;
 
         /// <summary>
         /// Valeur minimale du slider.
@@ -61,7 +62,7 @@ namespace DinaFramework.Graphics
             {
                 Vector2 offset = value - base.Position;
                 base.Position = value;
-                if(_track != null)
+                if (_track != null)
                     _track.Position += offset;
                 if (_thumb != null)
                     _thumb.Position += offset;
@@ -276,6 +277,37 @@ namespace DinaFramework.Graphics
                 thumbSize = new Vector2(width, height);
             }
             return thumbSize;
+        }
+
+        /// <summary>
+        /// Libère les ressources utilisées par le Slider et désabonne tous les événements.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Désabonne tous les événements.
+        /// </summary>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed)
+                return;
+
+            if (disposing)
+            {
+                _capturedSlider = null;
+                _track.Dispose();
+                _thumb.Dispose();
+                if (OnValueChanged != null)
+                {
+                    foreach (var handler in OnValueChanged.GetInvocationList())
+                        OnValueChanged -= (EventHandler<SliderValueEventArgs>)handler;
+                }
+            }
+            _disposed = true;
         }
     }
 

@@ -1,6 +1,6 @@
-# DinaFramework
+# DinaCSharp
 
-DinaFramework est un framework développé à partir de [MonoGame](https://github.com/MonoGame/MonoGame), conçu pour faciliter la création de jeux multiplateformes en C#.
+DinaCSharp est un framework développé à partir de [MonoGame](https://github.com/MonoGame/MonoGame), conçu pour faciliter la création de jeux multiplateformes en C#.
 
 ## Fonctionnalités
 
@@ -25,16 +25,16 @@ DinaFramework est un framework développé à partir de [MonoGame](https://githu
 1. Clonez le dépôt :
 
    ```bash
-   git clone https://github.com/Asthegor/DinaFramework.git
+   git clone https://github.com/Asthegor/DinaCSharp.git
    ```
 
-2. Ouvrez le fichier `DinaFramework.sln` avec Visual Studio.
+2. Ouvrez le fichier `DinaCSharp.sln` avec Visual Studio.
 3. Restaurez les packages NuGet nécessaires.
 
 ## Utilisation
 
-1. Ajoutez le projet `DinaFramework` à votre solution.
-2. Ajoutez une référence au projet `DinaFramework` dans votre projet de jeu.
+1. Ajoutez le projet `DinaCSharp` à votre solution.
+2. Ajoutez une référence au projet `DinaCSharp` dans votre projet de jeu.
 3. Vous n'avez plus qu'à utiliser les fonctionnalités du framework lors du développement de votre jeu.
 
 ## Documentation

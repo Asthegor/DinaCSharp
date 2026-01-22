@@ -1,30 +1,26 @@
-﻿using DinaFramework.Core;
-using DinaFramework.Events;
-using DinaFramework.Interfaces;
+﻿using DinaCSharp.Core;
+using DinaCSharp.Enums;
+using DinaCSharp.Events;
+using DinaCSharp.Interfaces;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 using System;
 
-namespace DinaFramework.Graphics
+namespace DinaCSharp.Graphics
 {
     /// <summary>
     /// Classe représentant un bouton graphique interactif avec gestion d'état via flags et événements.
     /// </summary>
-    public class Button : Base, IUpdate, IDraw, ILocked, IVisible, IClickable<ButtonEventArgs>//, IHovered<ButtonEventArgs>
+    public class Button : Base, IUpdate, IDraw, IUIStateful, IVisible, IClickable<ButtonEventArgs>, IClickable, IDisposable
     {
         private readonly Text? _text;
         private Panel _background;
-        private Panel? _hover;
+        private Panel? _panelHover;
         private Sprite? _lockedSprite;
         private Vector2 _margin = new Vector2(10, 10);
-        private Color _lockedColor = Color.Transparent;
-
-        private bool _locked;
-
-        private bool _isHovered;
-        private bool _visible;
+        private bool _disposed;
 
         /// <summary>
         /// Initialise un nouveau bouton avec texte et fond coloré.
@@ -34,7 +30,7 @@ namespace DinaFramework.Graphics
         {
             ArgumentNullException.ThrowIfNull(font);
 
-            _text = new Text(font, content, textColor, horizontalalignment: Enums.HorizontalAlignment.Center, verticalalignment: Enums.VerticalAlignment.Center);
+            _text = new Text(font, content, textColor, horizontalalignment: HorizontalAlignment.Center, verticalalignment: VerticalAlignment.Center);
             _margin = margin != default ? margin : _margin;
 
             Vector2 backgroundDim = _text.TextDimensions + _margin * 2;
@@ -51,6 +47,8 @@ namespace DinaFramework.Graphics
             RegisterOnHover(onHover);
 
             UpdateTextPosition();
+            //_text.Dimensions = Dimensions - _margin * 2;
+            //_text.Position += _margin;
             _text.Dimensions = Dimensions;
             Visible = true;
         }
@@ -74,6 +72,7 @@ namespace DinaFramework.Graphics
             ArgumentNullException.ThrowIfNull(backgroundImage);
             ArgumentNullException.ThrowIfNull(onClick);
 
+            _text = null;
             Position = position;
             Dimensions = new Vector2(backgroundImage.Width, backgroundImage.Height);
             _background = new Panel(Position, Dimensions, backgroundImage, 0);
@@ -98,8 +97,8 @@ namespace DinaFramework.Graphics
                     _background.Position += offset;
                 if (_lockedSprite != null)
                     _lockedSprite.Position += offset;
-                if (_hover != null)
-                    _hover.Position += offset;
+                if (_panelHover != null)
+                    _panelHover.Position += offset;
                 if (_text != null)
                     _text.Position += offset;
             }
@@ -118,8 +117,8 @@ namespace DinaFramework.Graphics
                     _background.Dimensions += offset;
                 if (_text != null)
                     _text.Dimensions += offset;
-                if (_hover != null)
-                    _hover.Dimensions += offset;
+                if (_panelHover != null)
+                    _panelHover.Dimensions += offset;
             }
         }
 
@@ -163,14 +162,6 @@ namespace DinaFramework.Graphics
         }
 
         /// <summary>
-        /// Indique si le bouton est verrouillé.
-        /// </summary>
-        public bool Locked
-        {
-            get => _locked;
-            set => _locked = value;
-        }
-        /// <summary>
         /// Couleur de la bordure du bouton.
         /// </summary>
         public Color BorderColor
@@ -197,26 +188,34 @@ namespace DinaFramework.Graphics
         /// <summary>
         /// Visibilité du bouton.
         /// </summary>
-        public bool Visible { get => _visible; set => _visible = value; }
+        public bool Visible { get; set; }
+        /// <summary>
+        /// État du bouton (Normal, Pressed, Hovered ou Locked).
+        /// </summary>
+        public UIState UIState { get; set; } = UIState.Normal;
+        /// <summary>
+        /// Couleur affichée quand le bouton est verrouillé.
+        /// </summary>
+        public Color LockedColor { get; set; } = Color.Gray * 0.75f;
 
         /// <summary>
         /// Définit la texture et la couleur affichées quand le bouton est verrouillé.
         /// </summary>
-        public void SetLockedImage(Texture2D lockedTexture, Color lockedColor)
+        public void SetLockedImage(Texture2D lockedTexture)
         {
             if (lockedTexture != null)
             {
-                _lockedSprite ??= new Sprite(lockedTexture, Color.White, Position);
-
-                _lockedSprite.Texture = lockedTexture;
-                _lockedSprite.Dimensions = Dimensions;
+                Vector2 dimensions = Dimensions;
+                _lockedSprite ??= new Sprite(lockedTexture, Color.White, Position)
+                {
+                    Texture = lockedTexture,
+                    Dimensions = dimensions
+                };
             }
             else
             {
                 _lockedSprite = null;
             }
-
-            _lockedColor = lockedColor;
         }
 
         /// <summary>
@@ -225,45 +224,48 @@ namespace DinaFramework.Graphics
         /// <param name="gametime"></param>
         public void Update(GameTime gametime)
         {
-            if (_background == null)
+            if (_background == null || UIState == UIState.Locked)
                 return;
-
-            if (Locked)
-            {
-                _isHovered = false;
-                return;
-            }
 
             _background.Update(gametime);
+
+            if (_background.IsHovered())
+                UIState = UIState.Hovered;
+            else if (UIState != UIState.Normal)
+                UIState = UIState.Normal;
         }
         /// <summary>
         /// Dessine le bouton.
         /// </summary>
         public void Draw(SpriteBatch spritebatch)
         {
-            if (!_visible)
+            if (!Visible || _background == null)
                 return;
 
-            if (_background == null)
-                return;
+            bool isFocusActive = _background.IsHovered() || UIState == UIState.Hovered;
 
-            Color backupColor = _background.BackgroundColor;
-
-            if (Locked && _lockedColor != Color.Transparent)
-                _background.BackgroundColor = _lockedColor;
-
-            if (_background.IsHovered() && _hover != null)
-                _hover.Draw(spritebatch);
-            else
-                _background.Draw(spritebatch);
-
-            if (Locked)
+            if (UIState == UIState.Locked)
             {
-                _lockedSprite?.Draw(spritebatch);
-                _background.BackgroundColor = backupColor;
+                Color originalColor = _background.BackgroundColor;
+                _background.BackgroundColor = LockedColor;
+                _background.Draw(spritebatch);
+                _background.BackgroundColor = originalColor;
+            }
+            else if (isFocusActive)
+            {
+                if (_panelHover != null)
+                    _panelHover.Draw(spritebatch);
+                else
+                    _background.Draw(spritebatch);
+
+                _text?.Draw(spritebatch);
+            }
+            else
+            {
+                _background.Draw(spritebatch);
+                _text?.Draw(spritebatch);
             }
 
-            _text?.Draw(spritebatch);
         }
 
         /// <summary>
@@ -293,13 +295,13 @@ namespace DinaFramework.Graphics
         {
             if (hoverImage == null)
             {
-                _hover = null;
+                _panelHover = null;
                 return;
             }
-            if (_hover == null)
-                _hover = new Panel(default, dimensions ?? Dimensions, hoverImage, 0);
+            if (_panelHover == null)
+                _panelHover = new Panel(default, dimensions ?? Dimensions, hoverImage, 0);
             else
-                _hover.SetImage(hoverImage);
+                _panelHover.SetImage(hoverImage);
             UpdateHoverImagePosition();
         }
         /// <summary>
@@ -312,7 +314,7 @@ namespace DinaFramework.Graphics
         public void SetHoverImages(params Texture2D[] textures)
         {
             ArgumentNullException.ThrowIfNull(textures, nameof(textures));
-            _hover = CreatePanel(textures);
+            _panelHover = CreatePanel(textures);
         }
         /// <summary>
         /// Permet de définir la couleur de fond lors du survol de la souris.
@@ -320,8 +322,8 @@ namespace DinaFramework.Graphics
         /// <param name="color">Couleur à appliquer lors du survol de la souris.</param>
         public void SetHoverColor(Color color)
         {
-            if (_hover != null)
-                _hover.BackgroundColor = color;
+            if (_panelHover != null)
+                _panelHover.BackgroundColor = color;
         }
         /// <summary>
         /// Événement déclenché quand le bouton est cliqué.
@@ -342,10 +344,10 @@ namespace DinaFramework.Graphics
         }
         private void UpdateHoverImagePosition()
         {
-            if (_hover == null)
+            if (_panelHover == null)
                 return;
-            Vector2 offset = Dimensions - _hover.Dimensions;
-            _hover.Position = Position + offset / 2;
+            Vector2 offset = Dimensions - _panelHover.Dimensions;
+            _panelHover.Position = Position + offset / 2;
         }
         private Panel CreatePanel(Texture2D[] textures)
         {
@@ -389,8 +391,62 @@ namespace DinaFramework.Graphics
         /// <returns></returns>
         public bool IsHovered()
         {
+            if (UIState == UIState.Locked)
+                return false;
             return _background.IsHovered();
         }
+        /// <summary>
+        /// Effectue un clic de souris
+        /// </summary>
+        public void LeftClick()
+        {
+            _background.LeftClick();
+        }
+        /// <summary>
+        /// Effectue un clic droit de la souris
+        /// </summary>
+        public void RightClick()
+        {
+            _background.RightClick();
+        }
 
+        /// <summary>
+        /// Libère les ressources utilisées par le Text.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Désabonne tous les événements.
+        /// </summary>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed)
+                return;
+
+            if (disposing)
+            {
+                _text?.Dispose();
+                _background.Dispose();
+                _panelHover?.Dispose();
+                _lockedSprite = null;
+
+
+                if (OnHovered != null)
+                {
+                    foreach (var handler in OnHovered.GetInvocationList())
+                        OnHovered -= (EventHandler<ButtonEventArgs>)handler;
+                }
+                if (OnClicked != null)
+                {
+                    foreach (var handler in OnClicked.GetInvocationList())
+                        OnClicked -= (EventHandler<ButtonEventArgs>)handler;
+                }
+            }
+            _disposed = true;
+        }
     }
 }

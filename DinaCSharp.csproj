@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <SignAssembly>False</SignAssembly>
+    <Authors>Dominique LACOMBE</Authors>
+    <AnalysisLevel>latest-all</AnalysisLevel>
+    <Title>DinaCSharp</Title>
+    <Description>DinaCSharp est un moteur de jeu personnalisé développé par Dominique LACOMBE et réalisé à partir de MonoGame.</Description>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <DocumentationFile>$(OutputPath)\Documentation.xml</DocumentationFile>
+    <Nullable>enable</Nullable>
+    <RootNamespace>DinaCSharp</RootNamespace>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <AssemblyVersion>1.0.*</AssemblyVersion>
+    <Deterministic>false</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'" />
+  <ItemGroup>
+    <Compile Remove=".config\**" />
+    <Compile Remove="Documentation\**" />
+    <EmbeddedResource Remove=".config\**" />
+    <EmbeddedResource Remove="Documentation\**" />
+    <None Remove=".config\**" />
+    <None Remove="Documentation\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Resources\CircleMask.png" />
+    <None Remove="Resources\DropDownArrow.png" />
+    <None Remove="Resources\Logo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\CircleMask.png" />
+    <EmbeddedResource Include="Resources\DropDownArrow.png" />
+    <EmbeddedResource Include="Resources\Logo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.4.1">
+      <PrivateAssets>All</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="DLACrypto">
+      <HintPath>DLACrypto.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Messages\Messages.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Messages.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Messages\Messages.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Messages.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+</Project>

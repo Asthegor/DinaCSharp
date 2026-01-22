@@ -1,13 +1,16 @@
 ﻿#pragma warning disable CS1591 // Les interfaces sont documentées via le summary de l'interface, pas chaque membre abstrait
 #pragma warning disable CA1040 // Interfaces vides intentionnelles pour le typage ou la composition d'autres interfaces
 
+using DinaCSharp.Enums;
+using DinaCSharp.Services;
+
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 using System;
 using System.Collections.Generic;
 
-namespace DinaFramework.Interfaces
+namespace DinaCSharp.Interfaces
 {
     /// <summary>
     /// Définit un objet de jeu complet comprenant le chargement, la réinitialisation, la mise à jour et l'affichage.
@@ -136,6 +139,8 @@ namespace DinaFramework.Interfaces
     public interface IClickable
     {
         public abstract bool IsClicked();
+        public abstract void LeftClick();
+        public abstract void RightClick();
     }
     public interface  IHovered
     {
@@ -173,9 +178,13 @@ namespace DinaFramework.Interfaces
     /// <summary>
     /// Définit une propriété pour verrouiller ou déverrouiller un objet.
     /// </summary>
-    public interface ILocked
+    public interface IUIStateful
     {
-        public abstract bool Locked { get; set; }
+        public abstract UIState UIState { get; set; }
+    }
+    public interface IRegister
+    {
+        public void Register(Key<ServiceTag> key);
     }
 }
 #pragma warning restore CA1040

@@ -1,12 +1,12 @@
-﻿using DinaFramework.Core;
-using DinaFramework.Interfaces;
+﻿using DinaCSharp.Core;
+using DinaCSharp.Interfaces;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 using System;
 
-namespace DinaFramework.Graphics
+namespace DinaCSharp.Graphics
 {
     /// <summary>
     /// Représente un sprite (image) avec des propriétés telles que la couleur, la position, la rotation, le redimensionnement et l'effet de réflexion.

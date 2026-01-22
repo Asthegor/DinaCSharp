@@ -1,6 +1,6 @@
-﻿using DinaFramework.Services;
+﻿using DinaCSharp.Services;
 
-namespace DinaFramework.Inputs
+namespace DinaCSharp.Inputs
 {
     /// <summary>Clés d’action génériques par défaut. Ne fait aucune distinction clavier/gamepad.</summary>
     public static class DefaultInputs
