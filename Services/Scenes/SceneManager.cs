@@ -40,6 +40,11 @@ namespace DinaCSharp.Services.Scenes
             }
             return _singleton;
         }
+        /// <summary>
+        /// Registers this instance with the service locator using the specified service tag key.
+        /// Enregistre l'instance dans le ServiceLocator en utilisant la clé ServiceTag fournie.
+        /// </summary>
+        /// <param name="key">La clé qui identifie de manière unique la service à enregistrer. Ne peut pas être null.</param>
         public void Register(Key<ServiceTag> key)
         {
             ServiceLocator.Register(key, this);
@@ -348,7 +353,6 @@ namespace DinaCSharp.Services.Scenes
         /// <param name="rasterizerState">L'état de rasterisation pour le rendu. Si null, conserve la valeur actuelle.</param>
         /// <param name="effect">L'effet (shader) à appliquer lors du rendu. Si null, conserve la valeur actuelle.</param>
         /// <param name="matrix">La matrice de transformation pour le rendu des sprites. Si null, conserve la valeur actuelle.</param>
-
         public void SetSpriteBatchParameters(
             SpriteSortMode? sortMode = null,
             BlendState? blendState = null,

@@ -89,7 +89,7 @@ namespace DinaCSharp.Graphics
         /// <param name="withroundcorner">Indique si on veut des coins arrondis.</param>
         /// <param name="radius">Rayon de l'arrondi.</param>
         /// <param name="zorder">L'ordre Z du panneau (par défaut 0).</param>
-        public Panel(Vector2 position, Vector2 dimensions, Texture2D image, int borderThickness, bool withroundcorner = false, int radius = 0, int zorder = 0) :
+        public Panel(Vector2 position, Vector2 dimensions, Texture2D image, int borderThickness = 0, bool withroundcorner = false, int radius = 0, int zorder = 0) :
             base(position, dimensions, zorder)
         {
             ArgumentNullException.ThrowIfNull(image);

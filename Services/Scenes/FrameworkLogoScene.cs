@@ -28,9 +28,6 @@ namespace DinaCSharp.Services.Scenes
         /// </summary>
         public override void Load()
         {
-            //logo = InternalAssets.Logo(SceneManager.GraphicsDevice) 
-            //    ?? throw new InvalidOperationException("Impossible de charger le logo du framework.");
-
             (float screenW, float screenH) = SceneManager.ScreenDimensions;
 
             float maxWidth = screenW * 0.4f;
