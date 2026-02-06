@@ -1,12 +1,16 @@
 ﻿using DinaCSharp.Core;
 using DinaCSharp.Enums;
 using DinaCSharp.Events;
+using DinaCSharp.Extensions;
 using DinaCSharp.Interfaces;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 
 using System;
+using System.Collections.Generic;
+using System.Reflection;
 
 namespace DinaCSharp.Graphics
 {
@@ -21,6 +25,12 @@ namespace DinaCSharp.Graphics
         private Sprite? _lockedSprite;
         private Vector2 _margin = new Vector2(10, 10);
         private bool _disposed;
+
+        private Dictionary<string, object> _originalValues = [];
+        private List<string> _modifiedHoverValues = [];
+        private List<string> _modifiedClickValues = [];
+        private bool _hoverOriginalSaved;
+        private bool _leftClicked;
 
         /// <summary>
         /// Initialise un nouveau bouton avec texte et fond coloré.
@@ -41,7 +51,7 @@ namespace DinaCSharp.Graphics
 
             _background ??= new Panel(Position, Dimensions, Color.Transparent, Color.Transparent, 1, withroundcorner, cornerradius);
 
-            LinkPanelEvents();
+            //LinkPanelEvents();
 
             RegisterOnClick(onClick);
             RegisterOnHover(onHover);
@@ -61,7 +71,7 @@ namespace DinaCSharp.Graphics
             : this(position, dimensions, font, content, textColor, onClick, margin, onHover)
         {
             _background = new Panel(Position, Dimensions, backgroundImage, 0);
-            LinkPanelEvents();
+            //LinkPanelEvents();
         }
 
         /// <summary>
@@ -76,7 +86,7 @@ namespace DinaCSharp.Graphics
             Position = position;
             Dimensions = new Vector2(backgroundImage.Width, backgroundImage.Height);
             _background = new Panel(Position, Dimensions, backgroundImage, 0);
-            LinkPanelEvents();
+            //LinkPanelEvents();
             RegisterOnClick(onClick);
             RegisterOnHover(onHover);
             Visible = true;
@@ -229,10 +239,64 @@ namespace DinaCSharp.Graphics
 
             _background.Update(gametime);
 
-            if (_background.IsHovered())
-                UIState = UIState.Hovered;
-            else if (UIState != UIState.Normal)
-                UIState = UIState.Normal;
+            //if (_background.IsHovered())
+            //    UIState = UIState.Hovered;
+            //else if (UIState != UIState.Normal)
+            //    UIState = UIState.Normal;
+
+            bool isHoveredNow = _background.IsHovered();
+            if (isHoveredNow)
+            {
+                if (!_hoverOriginalSaved)
+                {
+                    // Sauvegarder l'état AVANT d'invoquer OnHovered
+                    _originalValues = SaveValues();
+                    _hoverOriginalSaved = true;
+                }
+
+                if (UIState != UIState.Hovered)
+                {
+                    UIState = UIState.Hovered;
+
+                    // Invoquer OnHovered
+                    OnHovered?.Invoke(this, new ButtonEventArgs(this));
+
+                    // Détecter quelles propriétés ont été modifiées
+                    _modifiedHoverValues = [.. _originalValues.GetModifiedKeys(SaveValues())];
+                }
+                // Vérifie si le clic a eu lieu
+                _leftClicked = _background.IsLeftClicked();
+                if (_leftClicked)
+                {
+                    var beforeClickValues = SaveValues();
+                    OnClicked?.Invoke(this, new ButtonEventArgs(this));
+                    _modifiedClickValues = [.. beforeClickValues.GetModifiedKeys(SaveValues())];
+
+                    _modifiedHoverValues.RemoveAll(k => _modifiedClickValues.Contains(k));
+                }
+
+
+            }
+            else
+            {
+                _leftClicked = false;
+                if (UIState == UIState.Hovered)
+                {
+                    UIState = UIState.Normal;
+
+                }
+                if (_hoverOriginalSaved)
+                {
+                    var permanentState = SaveValues();
+                    RestoreOriginalValues(_modifiedHoverValues);
+                    ApplyValues(permanentState, _modifiedClickValues);
+
+                    _hoverOriginalSaved = false;
+                    _modifiedHoverValues.Clear();
+                }
+            }
+
+
         }
         /// <summary>
         /// Dessine le bouton.
@@ -275,7 +339,10 @@ namespace DinaCSharp.Graphics
         {
             if (backgroundImage == null)
                 return;
-            _background = new Panel(Position, Dimensions, backgroundImage, 0);
+            if(_background == null)
+                _background = new Panel(Position, Dimensions, backgroundImage, 0);
+            else
+                _background.SetImage(backgroundImage);
         }
         /// <summary>
         /// Définit les images pour le fond. les images du centre et du milieu pourront être agrandies en hauteur ou largeur.
@@ -283,6 +350,7 @@ namespace DinaCSharp.Graphics
         public void SetBackgroundImages(params Texture2D[] textures)
         {
             ArgumentNullException.ThrowIfNull(textures, nameof(textures));
+            _background?.Dispose();
             _background = CreatePanel(textures);
         }
         /// <summary>
@@ -386,6 +454,20 @@ namespace DinaCSharp.Graphics
             return _background.IsClicked();
         }
         /// <summary>
+        /// Indique si un clic droit a été effectué sur le bouton.
+        /// </summary>
+        public bool IsLeftClicked()
+        {
+            return _background.IsLeftClicked();
+        }
+        /// <summary>
+        /// Indique si un clic droit a été effectué sur le bouton.
+        /// </summary>
+        public bool IsRightClicked()
+        {
+            return _background.IsRightClicked();
+        }
+        /// <summary>
         /// Indique si le bouton est survolé.
         /// </summary>
         /// <returns></returns>
@@ -411,7 +493,7 @@ namespace DinaCSharp.Graphics
         }
 
         /// <summary>
-        /// Libère les ressources utilisées par le Text.
+        /// Libère les ressources utilisées par le Button.
         /// </summary>
         public void Dispose()
         {
@@ -448,5 +530,71 @@ namespace DinaCSharp.Graphics
             }
             _disposed = true;
         }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Ne pas intercepter les types d'exception générale", Justification = "<En attente>")]
+        private Dictionary<string, object> SaveValues()
+        {
+            Dictionary<string, object> values = [];
+            Type type = this.GetType();
+            PropertyInfo[] properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+            foreach (PropertyInfo property in properties)
+            {
+                // Ignorer les propriétés qui causent des problèmes
+                if (property.Name == "Dimensions" || property.Name == "Position")
+                    continue;
+
+                try
+                {
+                    var value = property.GetValue(this);
+                    if (value != null)
+                        values[property.Name] = value;
+                }
+                catch
+                {
+                    // Ignorer les propriétés qui ne peuvent pas être lues
+                }
+            }
+            return values;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Ne pas intercepter les types d'exception générale", Justification = "<En attente>")]
+        private void RestoreOriginalValues(List<string>? modifiedKeys = null)
+        {
+            if (modifiedKeys == null || modifiedKeys.Count == 0)
+                return;
+
+            foreach (string key in modifiedKeys)
+            {
+                if (_originalValues.ContainsKey(key))
+                {
+                    PropertyInfo? property = GetType().GetProperty(key);
+                    if (property != null && property.CanWrite)
+                    {
+                        try
+                        {
+                            property.SetValue(this, _originalValues[key]);
+                        }
+                        catch
+                        {
+                            // Ignorer les propriétés qui ne peuvent pas être écrites
+                        }
+                    }
+                }
+            }
+        }
+        private void ApplyValues(Dictionary<string, object> reference, List<string> keys)
+        {
+            foreach (var key in keys)
+            {
+                if (reference.TryGetValue(key, out var value))
+                {
+                    PropertyInfo? prop = GetType().GetProperty(key);
+                    if (prop != null)
+                        prop.SetValue(this, value);
+                }
+            }
+        }
+
     }
 }

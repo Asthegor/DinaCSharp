@@ -139,6 +139,8 @@ namespace DinaCSharp.Interfaces
     public interface IClickable
     {
         public abstract bool IsClicked();
+        public abstract bool IsLeftClicked();
+        public abstract bool IsRightClicked();
         public abstract void LeftClick();
         public abstract void RightClick();
     }
@@ -164,8 +166,7 @@ namespace DinaCSharp.Interfaces
     /// </summary>
     public interface ILoadingScreen
     {
-        public abstract float Progress { get; set; }
-        public abstract string Text { get; set; }
+        public abstract string Message { get; set; }
     }
     /// <summary>
     /// Définit une méthode pour effectuer une copie d'un objet.

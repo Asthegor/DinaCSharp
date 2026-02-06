@@ -112,6 +112,17 @@ namespace DinaCSharp.Events
     }
 
     /// <summary>
+    /// Fournit des données pour les événements liés au Polygon.
+    /// </summary>
+    public class PolygonEventArgs(Polygon polygon) : EventArgs, IEventArgs
+    {
+        /// <summary>
+        /// Obtient le Polygon associé à l'événement.
+        /// </summary>
+        public Polygon Polygon { get; } = polygon;
+    }
+
+    /// <summary>
     /// Contient les informations d'un événement lié à un <see cref="Slider"/>.
     /// </summary>
     /// <remarks>

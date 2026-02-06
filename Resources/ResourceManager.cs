@@ -35,6 +35,10 @@ namespace DinaCSharp.Resources
             }
         }
 
+        /// <summary>
+        /// Permet d'enregistrer la ressource dans le ServiceLocator.
+        /// </summary>
+        /// <param name="key">Clé de la ressource à enregistrer dans le ServiceLocator.</param>
         public void Register(Key<ResourceTag> key)
         {
             ServiceLocator.Register(key, this);

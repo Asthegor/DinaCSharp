@@ -208,7 +208,7 @@ namespace DinaCSharp.Services.Scenes
         /// <summary>
         /// Détache tous les abonnés à l'événement <see cref="OnResolutionChanged"/>.
         /// </summary>
-        public virtual void Dispose()
+        public virtual void ClearEventSubscribers()
         {
             OnResolutionChanged = null; // Détache tous les abonnés
         }

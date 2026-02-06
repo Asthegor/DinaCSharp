@@ -20,7 +20,16 @@ namespace DinaCSharp.Services
         public static T? Get<T>(IKey key)
         {
             if (_dictionary != null && _dictionary.TryGetValue(key, out object? result))
-                return (T)result;
+            {
+                if (result is T typedResult)
+                    return typedResult;
+
+                // Message d'erreur explicite
+                throw new InvalidCastException(
+                    $"Le service enregistré pour la clé '{key}' est de type '{result.GetType().Name}', " +
+                    $"mais le type attendu est '{typeof(T).Name}'."
+                );
+            }
             return default;
         }
         /// <summary>

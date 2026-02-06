@@ -179,6 +179,32 @@ namespace DinaCSharp.Core
             return false;
         }
         /// <summary>
+        /// Vérifie si un élément du groupe est cliqué avec le clic gauche de la souris.
+        /// </summary>
+        /// <returns>True si un élément est cliqué avec le clic gauche de la souris, sinon false.</returns>
+        public bool IsLeftClicked()
+        {
+            foreach (var item in _elements)
+            {
+                if (item is IClickable itemclickable)
+                    return itemclickable.IsLeftClicked();
+            }
+            return false;
+        }
+        /// <summary>
+        /// Vérifie si un élément du groupe est cliqué avec le clic droit de la souris.
+        /// </summary>
+        /// <returns>True si un élément est cliqué avec le clic droit de la souris, sinon false.</returns>
+        public bool IsRightClicked()
+        {
+            foreach (var item in _elements)
+            {
+                if (item is IClickable itemclickable)
+                    return itemclickable.IsRightClicked();
+            }
+            return false;
+        }
+        /// <summary>
         /// Vérifie si un élément du groupe est cliqué.
         /// </summary>
         /// <returns>True si un élément est cliqué, sinon false.</returns>

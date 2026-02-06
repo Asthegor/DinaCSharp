@@ -83,7 +83,7 @@ namespace DinaCSharp.Services.Scenes
             _screenManager = ServiceLocator.Get<ScreenManager>(ServiceKeys.ScreenManager);
             if (_screenManager == null)
                 throw new InvalidOperationException("ScreenManager non enregistré dans le ServiceLocator.");
-            _screenManager.OnResolutionChanged += (sender, e) => HandleSceneManagerResolutionChanged();
+            _screenManager.OnResolutionChanged += HandleSceneManagerResolutionChanged;
 
             _frameworkLogoShown = true;
             _updateInputManager = false;
@@ -101,7 +101,7 @@ namespace DinaCSharp.Services.Scenes
             _screenManager = ServiceLocator.Get<ScreenManager>(ServiceKeys.ScreenManager);
             if (_screenManager == null)
                 throw new InvalidOperationException("ScreenManager non enregistré dans le ServiceLocator.");
-            _screenManager.OnResolutionChanged += (sender, e) => HandleSceneManagerResolutionChanged();
+            _screenManager.OnResolutionChanged += HandleSceneManagerResolutionChanged;
 
             _updateInputManager = true;
 
@@ -285,7 +285,7 @@ namespace DinaCSharp.Services.Scenes
         {
             _loadingScreen?.Reset();
             if (_loadingScreen is ILoadingScreen ls)
-                ls.Text = message;
+                ls.Message = message;
         }
         #endregion
 
@@ -457,12 +457,12 @@ namespace DinaCSharp.Services.Scenes
         public event EventHandler<SceneEventArgs>? OnResolutionChanged;
 #pragma warning restore CS0067
 
-        private void HandleSceneManagerResolutionChanged()
+        private void HandleSceneManagerResolutionChanged(object? sender, EventArgs e)
         {
             if (_currentScene != null)
             {
                 Unload();
-                _currentScene.Dispose();
+                _currentScene.ClearEventSubscribers();
                 _currentScene.Load();
                 _currentScene.Loaded = true;
                 _currentSceneLoaded = true;
@@ -574,10 +574,20 @@ namespace DinaCSharp.Services.Scenes
         /// </summary>
         public void Dispose()
         {
-            _content.Dispose();
+            foreach(var scene in _scenes.Values)
+            {
+                scene?.ClearEventSubscribers();
+            }
+            _scenes.Clear();
+            _loadingScreen?.ClearEventSubscribers();
+
+            _content?.Dispose();
             _currentBlendState?.Dispose();
             _defaultBlendState?.Dispose();
             _defaultSamplerState?.Dispose();
+
+            if (_screenManager != null)
+                _screenManager.OnResolutionChanged -= HandleSceneManagerResolutionChanged;
         }
     }
 }

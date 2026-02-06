@@ -667,6 +667,17 @@ namespace DinaCSharp.Services.Menus
                 _oldMouseState = ms;
                 return;
             }
+            else if (clicked && hoveredItem == null)
+            {
+                if (Cancellation != null)
+                {
+                    Reset();
+                    Visible = false;
+                    Cancellation.Invoke();
+                    _oldMouseState = ms;
+                    return;
+                }
+            }
 
             bool rightClick = _oldMouseState.RightButton == ButtonState.Pressed && ms.RightButton == ButtonState.Released;
             if (rightClick)
