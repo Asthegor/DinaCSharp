@@ -1,0 +1,158 @@
+﻿using DinaCSharp.Core.Utils;
+using DinaCSharp.Events;
+using DinaCSharp.Interfaces;
+
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace DinaCSharp.Services.Screen
+{
+    /// <summary>
+    /// Gère les paramètres d'affichage du jeu, tels que le mode plein écran et la résolution d'écran, via le GraphicsDeviceManager.
+    /// </summary>
+    /// <remarks>
+    /// Cette classe centralise la gestion de l'affichage pour éviter de disperser la logique dans plusieurs composants.
+    /// Elle est enregistrée dans le ServiceLocator pour être facilement accessible dans tout le projet.
+    /// </remarks>
+    public sealed class ScreenManager : IRegister
+    {
+        private readonly GraphicsDeviceManager _graphics;
+        private readonly GameWindow _window;
+        private Point _currentResolution;
+
+        /// <summary>
+        /// Initialise une nouvelle instance de la classe ScreenManager et l'enregistre éventuellement dans le ServiceLocator.
+        /// </summary>
+        /// <param name="graphics"> L'instance de GraphicsDeviceManager utilisée pour modifier les paramètres d'affichage.</param>
+        /// <param name="window"></param>
+        private ScreenManager(GraphicsDeviceManager graphics, GameWindow window)
+        {
+            _graphics = graphics ?? throw new ArgumentNullException(nameof(graphics));
+            _window = window ?? throw new ArgumentNullException(nameof(window));
+            _window.ClientSizeChanged += HandleResize!;
+            _currentResolution = new Point(_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
+        }
+
+        private static List<Point>? _allowedResolutions;
+        private static List<DisplayMode>? _cachedResolutions;
+        /// <summary>
+        /// Définit la liste des résolutions autorisées pour le jeu.
+        /// </summary>
+        public static void SetAllowedResolutions(IEnumerable<Point>? resolutions)
+        {
+            var current = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode;
+            int maxW = current.Width;
+            int maxH = current.Height;
+            _allowedResolutions = resolutions?.Where(r => r.X <= maxW && r.Y <= maxH).ToList();
+
+            if (_allowedResolutions == null || _allowedResolutions.Count == 0)
+                _cachedResolutions = null;
+            else
+            {
+                var all = GraphicsAdapter.DefaultAdapter.SupportedDisplayModes;
+                _cachedResolutions = [.. all.Where(r => _allowedResolutions.Any(a => a.X == r.Width && a.X <= maxW && a.Y == r.Height && a.Y <= maxH))];
+            }
+        }
+        /// <summary>
+        /// Permet de récupérer la liste des résolutions de la carte graphique.
+        /// </summary>
+        /// <returns></returns>
+        public static IEnumerable<DisplayMode> AvailableResolutions
+        {
+            get
+            {
+                if (_cachedResolutions != null)
+                    return _cachedResolutions;
+                return GraphicsAdapter.DefaultAdapter.SupportedDisplayModes;
+            }
+        }
+
+
+        /// <summary>
+        /// Permet de savoir si l'affiche est en mode plein écran (true) ou fenêtré (false).
+        /// </summary>
+        public bool IsFullScreen => _graphics.IsFullScreen;
+
+        /// <summary>
+        /// Retourne la résolution actuelle.
+        /// </summary>
+        public Point CurrentResolution => _currentResolution;
+
+        /// <summary>
+        /// Actions lors du changement de résolution.
+        /// </summary>
+        public event EventHandler<ScreenManagerEventArgs>? OnResolutionChanged;
+
+        /// <summary>
+        /// Crée une instance de ScreenManager et l'enregistre dans le ServiceLocator.
+        /// </summary>
+        /// <param name="graphics"></param>
+        /// <param name="window"></param>
+        public static ScreenManager Initialize(GraphicsDeviceManager graphics, GameWindow window)
+        {
+            return new ScreenManager(graphics, window);
+        }
+        /// <summary>
+        /// Enregistre l'instance actuelle dans le ServiceLocator avec la clé spécifiée.
+        /// </summary>
+        /// <param name="key">Clé de type ServiceTag</param>
+        public void Register(Key<ServiceTag> key)
+        {
+            ServiceLocator.Register(key, this);
+        }
+
+        private void HandleResize(object sender, EventArgs e)
+        {
+            int newWidth = _window.ClientBounds.Width;
+            int newHeight = _window.ClientBounds.Height;
+
+            if (newWidth != _graphics.PreferredBackBufferWidth ||
+                newHeight != _graphics.PreferredBackBufferHeight)
+            {
+                SetResolution(newWidth, newHeight);
+            }
+        }
+
+        /// <summary>
+        /// Définit la résolution d'affichage du jeu.
+        /// </summary>
+        /// <param name="width">Largeur de l'écran en pixels.</param>
+        /// <param name="height">Hauteur de l'écran en pixels.</param>
+        public void SetResolution(int width, int height)
+        {
+            _graphics.PreferredBackBufferWidth = width;
+            _graphics.PreferredBackBufferHeight = height;
+            _graphics.ApplyChanges();
+            _currentResolution = new Point(_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
+            OnResolutionChanged?.Invoke(this, new ScreenManagerEventArgs(this));
+
+            UIScaler.Update(_currentResolution.ToVector2());
+        }
+
+        /// <summary>
+        /// Définit le mode plein écran (true) ou non (false).
+        /// </summary>
+        /// <param name="isChecked"></param>
+        public void SetFullScreen(bool isChecked)
+        {
+            if (_graphics.IsFullScreen == isChecked)
+                return;
+
+            _graphics.IsFullScreen = isChecked;
+            _window.IsBorderless = isChecked;
+            _graphics.ApplyChanges();
+            if (!isChecked)
+            {
+                _graphics.IsFullScreen = isChecked;
+                _window.IsBorderless = isChecked;
+                _graphics.ApplyChanges();
+            }
+        }
+
+    }
+
+}

@@ -1,0 +1,59 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace DinaCSharp.Services
+{
+    /// <summary>
+    /// Fournit une implémentation simple pour la localisation de services, permettant d'enregistrer, de récupérer et de supprimer des services à l'aide de clés uniques.
+    /// </summary>
+    public static class ServiceLocator
+    {
+        // Stockage interne des services enregistrés, associant une clé unique à chaque service.
+        private static readonly Dictionary<IKey, object> _dictionary = [];
+        /// <summary>
+        /// Récupère un service enregistré à l'aide de sa clé.
+        /// </summary>
+        /// <typeparam name="T">Type attendu du service.</typeparam>
+        /// <param name="key">Clé unique associée au service.</param>
+        /// <returns>Le service correspondant à la clé spécifiée, casté en type T.</returns>
+        /// <exception cref="KeyNotFoundException">Si la clé spécifiée n'existe pas dans le dictionnaire.</exception>
+        public static T? Get<T>(IKey key)
+        {
+            if (_dictionary != null && _dictionary.TryGetValue(key, out object? result))
+            {
+                if (result is T typedResult)
+                    return typedResult;
+
+                // Message d'erreur explicite
+                throw new InvalidCastException(
+                    $"Le service enregistré pour la clé '{key}' est de type '{result.GetType().Name}', " +
+                    $"mais le type attendu est '{typeof(T).Name}'."
+                );
+            }
+            return default;
+        }
+        /// <summary>
+        /// Enregistre ou met à jour un service associé à une clé spécifique.
+        /// </summary>
+        /// <param name="key">Clé unique pour identifier le service.</param>
+        /// <param name="value">Instance du service à enregistrer.</param>
+        public static void Register(IKey key, object value)
+        {
+            _dictionary[key] = value ?? throw new ArgumentNullException(nameof(value));
+        }
+        /// <summary>
+        /// Supprime un service enregistré à l'aide de sa clé.
+        /// </summary>
+        /// <param name="key">Clé unique associée au service à supprimer.</param>
+        /// <returns>Retourne <c>true</c> si le service a été supprimé avec succès, sinon <c>false</c>.</returns>
+        public static bool Unregister(IKey key)
+        {
+            return _dictionary.Remove(key);
+        }
+
+        internal static bool Exists(IKey v)
+        {
+            return _dictionary.ContainsKey(v);
+        }
+    }
+}

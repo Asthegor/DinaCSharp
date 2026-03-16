@@ -1,0 +1,324 @@
+﻿#nullable enable
+
+using DinaCSharp.Core;
+using DinaCSharp.Enums;
+using DinaCSharp.Events;
+using DinaCSharp.Interfaces;
+
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
+
+using System;
+
+namespace DinaCSharp.Graphics
+{
+    /// <summary>
+    /// Composant graphique représentant un slider (curseur) permettant de sélectionner une valeur dans une plage donnée.
+    /// Supporte le glissement du curseur ainsi que l’incrément/décrément par clic sur la piste.
+    /// Prend en charge différentes directions de progression via l’enum ProgressDirection.
+    /// </summary>
+    public class Slider : Base, IGameObject, IDisposable
+    {
+        private static Slider? _capturedSlider;
+        private bool _disposed;
+        private float _minValue;
+        private float _maxValue;
+        private float _step;
+        private float _value;
+
+        /// <summary>
+        /// Valeur minimale du slider.
+        /// </summary>
+        public float MinValue
+        {
+            get => _minValue;
+            set => SetProperty(ref _minValue, value);
+        }
+
+        /// <summary>
+        /// Valeur maximale du slider.
+        /// </summary>
+        public float MaxValue
+        {
+            get => _maxValue;
+            set => SetProperty(ref _maxValue, value);
+        }
+
+        /// <summary>
+        /// Incrément minimal entre deux valeurs.
+        /// </summary>
+        public float Step
+        {
+            get => _step;
+            set => SetProperty(ref _step, value);
+        }
+
+        /// <summary>
+        /// Valeur actuelle du slider.
+        /// </summary>
+        public float Value
+        {
+            get => _value;
+            set
+            {
+                value = MathHelper.Clamp(value, MinValue, MaxValue);
+                if (Step > 0)
+                    value = (float)Math.Round(value / Step) * Step;
+                SetProperty(ref _value, value);
+                UpdateThumbPosition();
+            }
+        }
+
+        /// <summary>
+        /// Direction de progression du slider (ex: gauche-droite, droite-gauche, haut-bas, bas-haut).
+        /// </summary>
+        public ProgressDirection SliderOrientation { get; set; }
+
+        /// <summary>
+        /// Action appelée lorsque la valeur du slider change.
+        /// </summary>
+        public event EventHandler<SliderValueEventArgs>? OnValueChanged;
+        /// <summary>
+        /// Position du slider.
+        /// </summary>
+        public override Vector2 Position
+        {
+            get => base.Position;
+            set
+            {
+                Vector2 offset = value - base.Position;
+                base.Position = value;
+                if (_track != null)
+                    _track.Position += offset;
+                if (_thumb != null)
+                    _thumb.Position += offset;
+                NotifyPropertyChanged();
+            }
+        }
+        /// <summary>
+        /// Dimensions du slider.
+        /// </summary>
+        public new Vector2 Dimensions
+        {
+            get => base.Dimensions;
+            set
+            {
+                base.Dimensions = value;
+                _track.Dimensions = value;
+                _thumb.Dimensions = CalculateThumbDimensions(SliderOrientation);
+                NotifyPropertyChanged();
+            }
+        }
+
+        private readonly Panel _track;
+        private readonly Panel _thumb;
+        //private bool _isDragging;
+
+        /// <summary>
+        /// Crée un nouveau slider.
+        /// </summary>
+        /// <param name="position">Position de la piste.</param>
+        /// <param name="dimensions">Dimensions de la piste.</param>
+        /// <param name="minValue">Valeur minimale.</param>
+        /// <param name="maxValue">Valeur maximale.</param>
+        /// <param name="initialValue">Valeur initiale.</param>
+        /// <param name="step">Incrément minimal.</param>
+        /// <param name="orientation">Direction de progression du slider.</param>
+        /// <param name="zorder"></param>
+        public Slider(Vector2 position, Vector2 dimensions, float minValue, float maxValue, float initialValue, float step = 1f, ProgressDirection orientation = ProgressDirection.LeftToRight, int zorder = 0)
+            : base(position, dimensions, zorder)
+        {
+            MinValue = minValue;
+            MaxValue = maxValue;
+            Step = step;
+            SliderOrientation = orientation;
+
+            _track = new Panel(position, dimensions, Color.Gray);
+
+            var thumbSize = CalculateThumbDimensions(orientation);
+            _thumb = new Panel(Vector2.Zero, thumbSize, Color.White);
+
+            Value = initialValue;
+            UpdateThumbPosition();
+        }
+
+        /// <summary>
+        /// Met à jour l'état du slider (clic, glissement, incrément/décrément).
+        /// </summary>
+        public void Update(GameTime gametime)
+        {
+            MouseState mouse = Mouse.GetState();
+            Vector2 mousePos = new Vector2(mouse.X, mouse.Y);
+
+            Rectangle thumbBounds = new Rectangle(_thumb.Position.ToPoint(), _thumb.Dimensions.ToPoint());
+            if (mouse.LeftButton == ButtonState.Pressed && _capturedSlider == null && thumbBounds.Contains(mousePos))
+                _capturedSlider = this;
+
+            if (_capturedSlider == this && mouse.LeftButton == ButtonState.Pressed)
+                UpdateValueFromMouse(mousePos);
+
+            Rectangle trackBounds = new Rectangle(_track.Position.ToPoint(), _track.Dimensions.ToPoint());
+            if (mouse.LeftButton == ButtonState.Pressed && _capturedSlider == null && trackBounds.Contains(mousePos))
+                HandleTrackClick(mousePos, thumbBounds);
+
+            if (mouse.LeftButton == ButtonState.Released && _capturedSlider == this)
+                _capturedSlider = null;
+        }
+        private void HandleTrackClick(Vector2 mousePos, Rectangle thumbBounds)
+        {
+            // Gère clic à gauche/droite ou haut/bas selon l’orientation et le sens
+            switch (SliderOrientation)
+            {
+                case ProgressDirection.LeftToRight:
+                    if (mousePos.X < thumbBounds.Left)
+                        Value -= Step;
+                    else if (mousePos.X > thumbBounds.Right)
+                        Value += Step;
+                    break;
+                case ProgressDirection.RightToLeft:
+                    if (mousePos.X > thumbBounds.Right)
+                        Value -= Step;
+                    else if (mousePos.X < thumbBounds.Left)
+                        Value += Step;
+                    break;
+                case ProgressDirection.TopToBottom:
+                    if (mousePos.Y < thumbBounds.Top)
+                        Value += Step;
+                    else if (mousePos.Y > thumbBounds.Bottom)
+                        Value -= Step;
+                    break;
+                case ProgressDirection.BottomToTop:
+                    if (mousePos.Y > thumbBounds.Bottom)
+                        Value += Step;
+                    else if (mousePos.Y < thumbBounds.Top)
+                        Value -= Step;
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Dessine la piste et le curseur.
+        /// </summary>
+        public void Draw(SpriteBatch spritebatch)
+        {
+            _track.Draw(spritebatch);
+            _thumb.Draw(spritebatch);
+        }
+
+        private void UpdateValueFromMouse(Vector2 mousePos)
+        {
+            float ratio = 0f;
+
+            switch (SliderOrientation)
+            {
+                case ProgressDirection.LeftToRight:
+                    ratio = MathHelper.Clamp((mousePos.X - _track.Position.X) / _track.Dimensions.X, 0f, 1f);
+                    break;
+                case ProgressDirection.RightToLeft:
+                    ratio = 1f - MathHelper.Clamp((mousePos.X - _track.Position.X) / _track.Dimensions.X, 0f, 1f);
+                    break;
+                case ProgressDirection.TopToBottom:
+                    ratio = MathHelper.Clamp((mousePos.Y - _track.Position.Y) / _track.Dimensions.Y, 0f, 1f);
+                    break;
+                case ProgressDirection.BottomToTop:
+                    ratio = 1f - MathHelper.Clamp((mousePos.Y - _track.Position.Y) / _track.Dimensions.Y, 0f, 1f);
+                    break;
+            }
+
+            Value = MinValue + ratio * (MaxValue - MinValue);
+        }
+
+        private void UpdateThumbPosition()
+        {
+            float ratio = (Value - MinValue) / (MaxValue - MinValue);
+            Vector2 thumbPos = Vector2.Zero;
+
+            switch (SliderOrientation)
+            {
+                case ProgressDirection.LeftToRight:
+                    thumbPos = new Vector2(
+                        _track.Position.X + ratio * (_track.Dimensions.X - _thumb.Dimensions.X),
+                        _track.Position.Y
+                    );
+                    break;
+
+                case ProgressDirection.RightToLeft:
+                    thumbPos = new Vector2(
+                        _track.Position.X + (1f - ratio) * (_track.Dimensions.X - _thumb.Dimensions.X),
+                        _track.Position.Y
+                    );
+                    break;
+
+                case ProgressDirection.TopToBottom:
+                    thumbPos = new Vector2(
+                        _track.Position.X,
+                        _track.Position.Y + ratio * (_track.Dimensions.Y - _thumb.Dimensions.Y)
+                    );
+                    break;
+
+                case ProgressDirection.BottomToTop:
+                    thumbPos = new Vector2(
+                        _track.Position.X,
+                        _track.Position.Y + (1f - ratio) * (_track.Dimensions.Y - _thumb.Dimensions.Y)
+                    );
+                    break;
+            }
+
+            _thumb.Position = thumbPos;
+        }
+        private Vector2 CalculateThumbDimensions(ProgressDirection orientation)
+        {
+            // Taille du thumb rectangulaire avec ratio 4:1 (H:W si horizontal, W:H si vertical)
+            Vector2 thumbSize;
+            if (orientation == ProgressDirection.LeftToRight || orientation == ProgressDirection.RightToLeft)
+            {
+                // Horizontal : thumb fait toute la hauteur, largeur = hauteur / 4
+                float height = Dimensions.Y;
+                float width = height / 4f;
+                thumbSize = new Vector2(width, height);
+            }
+            else
+            {
+                // Vertical : thumb fait toute la largeur, hauteur = largeur / 4
+                float width = Dimensions.X;
+                float height = width / 4f;
+                thumbSize = new Vector2(width, height);
+            }
+            return thumbSize;
+        }
+
+        /// <summary>
+        /// Libère les ressources utilisées par le Slider et désabonne tous les événements.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Désabonne tous les événements.
+        /// </summary>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed)
+                return;
+
+            if (disposing)
+            {
+                _capturedSlider = null;
+                _track.Dispose();
+                _thumb.Dispose();
+                if (OnValueChanged != null)
+                {
+                    foreach (var handler in OnValueChanged.GetInvocationList())
+                        OnValueChanged -= (EventHandler<SliderValueEventArgs>)handler;
+                }
+            }
+            _disposed = true;
+        }
+    }
+
+
+}
