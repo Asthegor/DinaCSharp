@@ -363,7 +363,6 @@ MigrationBackup/
 FodyWeavers.xsd
 /GlobalSuppressions.cs
 /TODO List.txt
-/Core/Animated/InputBox.cs
 /DinaCSharp - Backup.csproj
 /Documentation
 /Documentation.xml
