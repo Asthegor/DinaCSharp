@@ -90,7 +90,11 @@ namespace DinaCSharp.Services.Menus
         public Vector2 ItemsPosition
         {
             get => _itemsGroup.Position;
-            set => _itemsGroup.Position = value;
+            set
+            {
+                _itemsGroup.Position = value;
+                _backgroundItems?.Position = value - _borderSpacing - _iconSpacing;
+            }
         }
         /// <summary>
         /// Obtient l'indice de l'élément actuellement sélectionné.
@@ -330,7 +334,7 @@ namespace DinaCSharp.Services.Menus
         {
             _centeredItems = true;
             _itemsScreenDimensions = screendimensions;
-            _itemsGroup.Position = (screendimensions - _itemsGroup.Dimensions) / 2;
+            _itemsGroup.Position = (screendimensions - ItemsDimensions) / 2;
             foreach (MenuItem item in _items)
             {
                 if (item is null)
@@ -407,23 +411,22 @@ namespace DinaCSharp.Services.Menus
             _borderSpacing = borderSpacing;
             _backgroundItems.Visible = true;
 
-            Vector2 itemDim = _itemsGroup.Dimensions + borderSpacing * 2.0f;
+            Vector2 itemDim = ItemsDimensions + borderSpacing * 2.0f;
 
             // Mise à jour de la position du panneau
-            _backgroundItems.Position = _itemsGroup.Position - new Vector2(borderSpacing.X, borderSpacing.Y);
+            _backgroundItems.Position = _itemsGroup.Position - borderSpacing;
             if (_iconLeft != null)
-            {
                 _backgroundItems.Position -= new Vector2(_iconLeft.Dimensions.X, 0);
-                if (_backgroundItems.Dimensions.X < itemDim.X + _iconLeft.Dimensions.X)
-                    _backgroundItems.Dimensions += new Vector2(_iconLeft.Dimensions.X, 0);
-            }
 
             // Mise à jour des dimensions du panneau
             if (_backgroundItems.Dimensions.X < itemDim.X || _backgroundItems.Dimensions.Y < itemDim.Y)
-                _backgroundItems.Dimensions = _itemsGroup.Dimensions + borderSpacing * 2.0f;
+                _backgroundItems.Dimensions = ItemsDimensions + borderSpacing * 2.0f;
 
+            if (_iconLeft != null && _backgroundItems.Dimensions.X < itemDim.X + _iconLeft.Dimensions.X)
+                _backgroundItems.Dimensions += new Vector2(_iconLeft.Dimensions.X, 0);
             if (_iconRight != null && _backgroundItems.Dimensions.X < itemDim.X + _iconRight.Dimensions.X)
                 _backgroundItems.Dimensions += new Vector2(_iconRight.Dimensions.X, 0);
+
 
             // Mise à jour du ZOrder du panneau
             int index = 0;
@@ -583,11 +586,11 @@ namespace DinaCSharp.Services.Menus
         }
         private float GetNextItemYPosition()
         {
-            return _itemsGroup.Dimensions.Y + (_itemsGroup.Count() > 0 ? _itemspacing.Y : 0.0f);
+            return ItemsDimensions.Y + (_itemsGroup.Count() > 0 ? _itemspacing.Y : 0.0f);
         }
         private float GetNextItemXPosition()
         {
-            return _itemsGroup.Dimensions.X + (_itemsGroup.Count() > 0 ? _itemspacing.X : 0.0f);
+            return ItemsDimensions.X + (_itemsGroup.Count() > 0 ? _itemspacing.X : 0.0f);
         }
 
         /// <summary>
@@ -633,7 +636,7 @@ namespace DinaCSharp.Services.Menus
                 _mouseHasMovedSinceLastKeyboard = true;
 
             Point mousePos = ms.Position;
-            Rectangle menuItemsGroupRect = new Rectangle(_itemsGroup.Position.ToPoint(), _itemsGroup.Dimensions.ToPoint());
+            Rectangle menuItemsGroupRect = _itemsGroup.CalculateBounds();
 
             if (menuItemsGroupRect.Contains(mousePos))
             {

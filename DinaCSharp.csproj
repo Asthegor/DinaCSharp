@@ -9,14 +9,18 @@
     <Description>DinaCSharp est un moteur de jeu personnalisé développé par Dominique LACOMBE et réalisé à partir de MonoGame.</Description>
     <NeutralLanguage>en-US</NeutralLanguage>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <DocumentationFile>$(OutputPath)\Documentation.xml</DocumentationFile>
+    <DocumentationFile>$(OutputPath)\DinaCSharp.xml</DocumentationFile>
     <Nullable>enable</Nullable>
     <RootNamespace>DinaCSharp</RootNamespace>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <Deterministic>false</Deterministic>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DebugType>none</DebugType>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Remove=".config\**" />
     <Compile Remove="Documentation\**" />
@@ -39,6 +43,9 @@
     <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.4.1">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MinVer" Version="6.*" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="DLACrypto">

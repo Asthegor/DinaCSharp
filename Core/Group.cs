@@ -395,7 +395,19 @@ namespace DinaCSharp.Core
                     draw.Draw(spritebatch);
             }
         }
-        private Rectangle CalculateBounds()
+        /// <summary>
+        /// Calcule le plus petit rectangle aligné sur les axes qui contient complètement tous les éléments du groupe.
+        /// </summary>
+        /// <remarks>
+        /// Utile pour déterminer l'étendue spatiale globale du groupe, notamment pour la mise en page, 
+        /// la détection de collisions ou le rendu. Le rectangle retourné est le rectangle minimal 
+        /// qui englobe les dimensions de chaque élément présent dans le groupe.
+        /// </remarks>
+        /// <returns>
+        /// Un <see cref="Rectangle"/> représentant la zone englobante de tous les éléments. 
+        /// Retourne <see cref="Rectangle.Empty"/> si le groupe ne contient aucun élément.
+        /// </returns>
+        public Rectangle CalculateBounds()
         {
             if (_elements.Count == 0)
                 return Rectangle.Empty;
@@ -503,7 +515,7 @@ namespace DinaCSharp.Core
         /// </summary>
         public void LeftClick()
         {
-            foreach(var elem in _elements)
+            foreach (var elem in _elements)
             {
                 if (elem is IClickable celem)
                     celem.LeftClick();
@@ -541,12 +553,12 @@ namespace DinaCSharp.Core
 
             if (disposing)
             {
-                foreach(var element in _elements)
+                foreach (var element in _elements)
                 {
                     if (element is IDisposable disposable)
                         disposable.Dispose();
                 }
-               _elements.Clear();
+                _elements.Clear();
             }
             _disposed = true;
         }

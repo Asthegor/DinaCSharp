@@ -22,26 +22,53 @@ namespace DinaCSharp.Graphics
     {
         private static Slider? _capturedSlider;
         private bool _disposed;
+        private float _minValue;
+        private float _maxValue;
+        private float _step;
+        private float _value;
 
         /// <summary>
         /// Valeur minimale du slider.
         /// </summary>
-        public float MinValue { get; set; }
+        public float MinValue
+        {
+            get => _minValue;
+            set => SetProperty(ref _minValue, value);
+        }
 
         /// <summary>
         /// Valeur maximale du slider.
         /// </summary>
-        public float MaxValue { get; set; }
+        public float MaxValue
+        {
+            get => _maxValue;
+            set => SetProperty(ref _maxValue, value);
+        }
 
         /// <summary>
         /// Incrément minimal entre deux valeurs.
         /// </summary>
-        public float Step { get; set; }
+        public float Step
+        {
+            get => _step;
+            set => SetProperty(ref _step, value);
+        }
 
         /// <summary>
         /// Valeur actuelle du slider.
         /// </summary>
-        public float Value { get; private set; }
+        public float Value
+        {
+            get => _value;
+            set
+            {
+                value = MathHelper.Clamp(value, MinValue, MaxValue);
+                if (Step > 0)
+                    value = (float)Math.Round(value / Step) * Step;
+                SetProperty(ref _value, value);
+                UpdateThumbPosition();
+            }
+        }
 
         /// <summary>
         /// Direction de progression du slider (ex: gauche-droite, droite-gauche, haut-bas, bas-haut).
@@ -66,6 +93,7 @@ namespace DinaCSharp.Graphics
                     _track.Position += offset;
                 if (_thumb != null)
                     _thumb.Position += offset;
+                NotifyPropertyChanged();
             }
         }
         /// <summary>
@@ -79,6 +107,7 @@ namespace DinaCSharp.Graphics
                 base.Dimensions = value;
                 _track.Dimensions = value;
                 _thumb.Dimensions = CalculateThumbDimensions(SliderOrientation);
+                NotifyPropertyChanged();
             }
         }
 
@@ -110,7 +139,7 @@ namespace DinaCSharp.Graphics
             var thumbSize = CalculateThumbDimensions(orientation);
             _thumb = new Panel(Vector2.Zero, thumbSize, Color.White);
 
-            SetValue(initialValue);
+            Value = initialValue;
             UpdateThumbPosition();
         }
 
@@ -143,27 +172,27 @@ namespace DinaCSharp.Graphics
             {
                 case ProgressDirection.LeftToRight:
                     if (mousePos.X < thumbBounds.Left)
-                        SetValue(Value - Step);
+                        Value -= Step;
                     else if (mousePos.X > thumbBounds.Right)
-                        SetValue(Value + Step);
+                        Value += Step;
                     break;
                 case ProgressDirection.RightToLeft:
                     if (mousePos.X > thumbBounds.Right)
-                        SetValue(Value - Step);
+                        Value -= Step;
                     else if (mousePos.X < thumbBounds.Left)
-                        SetValue(Value + Step);
+                        Value += Step;
                     break;
                 case ProgressDirection.TopToBottom:
                     if (mousePos.Y < thumbBounds.Top)
-                        SetValue(Value + Step);
+                        Value += Step;
                     else if (mousePos.Y > thumbBounds.Bottom)
-                        SetValue(Value - Step);
+                        Value -= Step;
                     break;
                 case ProgressDirection.BottomToTop:
                     if (mousePos.Y > thumbBounds.Bottom)
-                        SetValue(Value + Step);
+                        Value += Step;
                     else if (mousePos.Y < thumbBounds.Top)
-                        SetValue(Value - Step);
+                        Value -= Step;
                     break;
             }
         }
@@ -175,25 +204,6 @@ namespace DinaCSharp.Graphics
         {
             _track.Draw(spritebatch);
             _thumb.Draw(spritebatch);
-        }
-
-        /// <summary>
-        /// Définit une nouvelle valeur pour le slider.
-        /// </summary>
-        /// <param name="newValue">Nouvelle valeur à appliquer.</param>
-        public void SetValue(float newValue)
-        {
-            newValue = MathHelper.Clamp(newValue, MinValue, MaxValue);
-
-            if (Step > 0)
-                newValue = (float)Math.Round(newValue / Step) * Step;
-
-            if (Math.Abs(Value - newValue) > float.Epsilon)
-            {
-                Value = newValue;
-                UpdateThumbPosition();
-                OnValueChanged?.Invoke(this, new SliderValueEventArgs(Value));
-            }
         }
 
         private void UpdateValueFromMouse(Vector2 mousePos)
@@ -216,8 +226,7 @@ namespace DinaCSharp.Graphics
                     break;
             }
 
-            float newValue = MinValue + ratio * (MaxValue - MinValue);
-            SetValue(newValue);
+            Value = MinValue + ratio * (MaxValue - MinValue);
         }
 
         private void UpdateThumbPosition()

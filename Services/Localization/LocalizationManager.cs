@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Resources;
 
@@ -72,11 +73,16 @@ namespace DinaCSharp.Services.Localization
         /// Récupère la traduction pour une clé donnée dans la langue actuelle.
         /// </summary>
         /// <param name="key">La clé de la traduction.</param>
+        /// <param name="values">Liste des </param>
         /// <returns>La traduction correspondant à la clé, ou la clé elle-même si non trouvée.</returns>
-        public static string GetTranslation(string key)
+        public static string GetTranslation(string key, params string[] values)
         {
             if (_cache.TryGetValue(key, out var cached))
+            {
+                if (values?.Length > 0)
+                    return string.Format(CultureInfo.InvariantCulture, cached, values);
                 return cached;
+            }
 
             foreach (var rm in _resourceManagers)
             {
@@ -86,6 +92,8 @@ namespace DinaCSharp.Services.Localization
                     if (!string.IsNullOrEmpty(translation))
                     {
                         _cache[key] = translation;
+                        if (values?.Length > 0)
+                            return string.Format(CultureInfo.InvariantCulture, translation, values);
                         return translation;
                     }
                 }
@@ -103,7 +111,7 @@ namespace DinaCSharp.Services.Localization
         /// <param name="key">La clé de la traduction.</param>
         /// <param name="culture">Le code de la culture.</param>
         /// <returns>La traduction pour la culture spécifiée.</returns>
-        public static string GetTranslation(string key, string culture)
+        public static string GetTranslationForCulture(string key, string culture)
         {
             var previous = _currentCulture;
             _currentCulture = new CultureInfo(culture);
@@ -125,7 +133,7 @@ namespace DinaCSharp.Services.Localization
             var maxLength = Vector2.Zero;
             foreach (var language in GetAvailableLanguages())
             {
-                var translation = GetTranslation(key, language);
+                var translation = GetTranslationForCulture(key, language);
                 var size = font.MeasureString(translation);
 
                 maxLength = new Vector2(
@@ -161,16 +169,23 @@ namespace DinaCSharp.Services.Localization
             foreach (var directory in Directory.GetDirectories(directoryPath))
             {
                 var cultureName = Path.GetFileName(directory);
-                try
+                //try
+                //{
+                //    var culture = new CultureInfo(cultureName);
+                //    var satellitePath = Path.Combine(directory, $"{assembly.GetName().Name}.resources.dll");
+                //    if (File.Exists(satellitePath))
+                //        cultures.Add(cultureName);
+                //}
+                //catch (CultureNotFoundException)
+                //{
+                //    // Ignorer les dossiers non valides, mais ne pas bloquer la recherche des autres sous-répertoires
+                //}
+                if (CultureInfo.GetCultures(CultureTypes.AllCultures)
+                    .Any(c => c.Name.Equals(cultureName, StringComparison.OrdinalIgnoreCase)))
                 {
-                    var culture = new CultureInfo(cultureName);
                     var satellitePath = Path.Combine(directory, $"{assembly.GetName().Name}.resources.dll");
                     if (File.Exists(satellitePath))
                         cultures.Add(cultureName);
-                }
-                catch (CultureNotFoundException)
-                {
-                    // Ignorer les dossiers non valides, mais ne pas bloquer la recherche des autres sous-répertoires
                 }
                 AddCulturesFromSubdirectories(directory, cultures, assembly);
             }

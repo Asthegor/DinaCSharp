@@ -22,6 +22,9 @@ namespace DinaCSharp.Inputs
 
         /// <summary>Action d’annulation.</summary>
         public static readonly Key<ActionTag> Cancel = Key<ActionTag>.FromString("Cancel");
+
+        /// <summary>Action de mise en pause.</summary>
+        public static readonly Key<ActionTag> Pause = Key<ActionTag>.FromString("Pause");
     }
 
     /// <summary>Tag générique pour les actions du jeu.</summary>

@@ -80,9 +80,8 @@ namespace DinaCSharp.Services.Scenes
             GraphicsDevice = source.GraphicsDevice;
             _content = new ContentManager(_game.Services, contentRootDirectory);
 
-            _screenManager = ServiceLocator.Get<ScreenManager>(ServiceKeys.ScreenManager);
-            if (_screenManager == null)
-                throw new InvalidOperationException("ScreenManager non enregistré dans le ServiceLocator.");
+            _screenManager = ServiceLocator.Get<ScreenManager>(ServiceKeys.ScreenManager)
+                ?? throw new InvalidOperationException("ScreenManager non enregistré dans le ServiceLocator.");
             _screenManager.OnResolutionChanged += HandleSceneManagerResolutionChanged;
 
             _frameworkLogoShown = true;
@@ -98,9 +97,8 @@ namespace DinaCSharp.Services.Scenes
             GraphicsDevice = game.GraphicsDevice;
             _currentScene = null;
             _loadingScreen = null;
-            _screenManager = ServiceLocator.Get<ScreenManager>(ServiceKeys.ScreenManager);
-            if (_screenManager == null)
-                throw new InvalidOperationException("ScreenManager non enregistré dans le ServiceLocator.");
+            _screenManager = ServiceLocator.Get<ScreenManager>(ServiceKeys.ScreenManager)
+                ?? throw new InvalidOperationException("ScreenManager non enregistré dans le ServiceLocator.");
             _screenManager.OnResolutionChanged += HandleSceneManagerResolutionChanged;
 
             _updateInputManager = true;

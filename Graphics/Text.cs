@@ -56,6 +56,7 @@ namespace DinaCSharp.Graphics
             {
                 _content = value;
                 WrapText();
+                NotifyPropertyChanged();
             }
         }
         /// <summary>
@@ -64,7 +65,7 @@ namespace DinaCSharp.Graphics
         public Color Color
         {
             get => _color;
-            set => _color = value;
+            set => SetProperty(ref _color, value);
         }
         /// <summary>
         /// Indique si le texte est visible.
@@ -77,6 +78,7 @@ namespace DinaCSharp.Graphics
                 _visible = value;
                 _timerWaitTime = 0;
                 _timerDisplayTime = 0;
+                NotifyPropertyChanged();
             }
         }
         /// <summary>
@@ -89,6 +91,7 @@ namespace DinaCSharp.Graphics
             {
                 base.Position = value;
                 UpdateDisplayPosition();
+                NotifyPropertyChanged();
             }
         }
         /// <summary>
@@ -102,6 +105,7 @@ namespace DinaCSharp.Graphics
                 base.Dimensions = value;
                 WrapText();
                 UpdateDisplayPosition();
+                NotifyPropertyChanged();
             }
         }
         /// <summary>
@@ -114,6 +118,7 @@ namespace DinaCSharp.Graphics
             {
                 _font = value;
                 UpdateDisplayPosition();
+                NotifyPropertyChanged();
             }
         }
         /// <summary>
@@ -122,7 +127,7 @@ namespace DinaCSharp.Graphics
         public float Rotation
         {
             get => _rotation;
-            set => _rotation = value;
+            set => SetProperty(ref _rotation, value);
         }
         /// <summary>
         /// Initialise une nouvelle instance de la classe Text.
@@ -224,7 +229,10 @@ namespace DinaCSharp.Graphics
                 if (Wrap)
                     spritebatch.DrawString(_font, _wrappedContent ?? "", _displayposition, _color);
                 else
-                    spritebatch.DrawString(_font, LocalizationManager.GetTranslation(Content), _displayposition, _color, _rotation, _origin, 1f, _effects, ZOrder);
+                {
+                    float zorder = ZOrder > 0 ? 0.5f + (ZOrder / MAX_ZORDER) : (ZOrder / MIN_ZORDER);
+                    spritebatch.DrawString(_font, LocalizationManager.GetTranslation(Content), _displayposition, _color, _rotation, _origin, 1f, _effects, zorder);
+                }
             }
         }
         /// <summary>

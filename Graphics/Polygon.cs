@@ -48,7 +48,7 @@ namespace DinaCSharp.Graphics
             if (vertices == null || vertices.Length < 3)
                 throw new ArgumentException("Un polygone doit avoir au moins 3 sommets.", nameof(vertices));
 
-            _vertices = (Vector2[])vertices.Clone();
+            _vertices = [.. vertices];
             _fillColor = Color.Transparent;
             _borderColor = Color.Transparent;
             _thickness = 0;
@@ -86,15 +86,14 @@ namespace DinaCSharp.Graphics
         /// <summary>
         /// Obtient ou définit les sommets du polygone.
         /// </summary>
-        public Vector2[] Vertices
+        public IReadOnlyList<Vector2> Vertices
         {
-            get => (Vector2[])_vertices.Clone();
+            get => [.. _vertices];
             set
             {
-                if (value == null || value.Length < 3)
+                if (value == null || value.Count < 3)
                     throw new ArgumentException("Un polygone doit avoir au moins 3 sommets.", nameof(value));
-
-                _vertices = (Vector2[])value.Clone();
+                _vertices = [.. value];
                 Position = CalculatePosition(_vertices);
                 Dimensions = CalculateDimensions(_vertices);
             }
@@ -264,7 +263,7 @@ namespace DinaCSharp.Graphics
         private static void DrawTriangle(SpriteBatch spritebatch, Texture2D texture, Vector2 v1, Vector2 v2, Vector2 v3, Color color)
         {
             // Tri des sommets par Y
-            Vector2[] sorted = new[] { v1, v2, v3 }.OrderBy(v => v.Y).ToArray();
+            Vector2[] sorted = [.. new[] { v1, v2, v3 }.OrderBy(v => v.Y)];
             Vector2 top = sorted[0];
             Vector2 mid = sorted[1];
             Vector2 bottom = sorted[2];
@@ -460,7 +459,7 @@ namespace DinaCSharp.Graphics
         /// <returns>Une nouvelle instance de Polygon avec les mêmes propriétés.</returns>
         public Polygon Copy()
         {
-            return new Polygon((Vector2[])_vertices.Clone(), _fillColor, ZOrder)
+            return new Polygon([.. _vertices], _fillColor, ZOrder)
             {
                 _borderColor = _borderColor,
                 _thickness = _thickness,

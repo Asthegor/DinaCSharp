@@ -317,15 +317,24 @@ namespace DinaCSharp.Graphics
                         {
                             Point pos = Position.ToPoint();
                             Point dim = Dimensions.ToPoint();
+
+                            if (_thickness > 0 && BorderColor != BackgroundColor)
+                            {
+                                // Dessiner la bordure (rectangle extérieur avec coins arrondis)
+                                int borderRadius = _radiusCorner + _thickness / 2;
+                                Rectangle borderRect1 = new Rectangle(new Point((int)pos.X - _thickness + borderRadius, pos.Y - _thickness), new Point(dim.X + _thickness * 2 - borderRadius * 2, dim.Y + _thickness * 2));
+                                spritebatch.Draw(texture, borderRect1, BorderColor);
+                                Rectangle borderRect2 = new Rectangle(new Point((int)pos.X - _thickness, pos.Y - _thickness + borderRadius), new Point(dim.X + _thickness * 2, dim.Y + _thickness * 2 - borderRadius * 2));
+                                spritebatch.Draw(texture, borderRect2, BorderColor);
+                                spritebatch.MaskCorners(new Vector2(pos.X - _thickness, pos.Y - _thickness), new Vector2(dim.X + _thickness * 2, dim.Y + _thickness * 2), borderRadius, BorderColor);
+                            }
+
+                            // Dessiner le fond (rectangle intérieur avec coins arrondis)
                             Rectangle rect1 = new Rectangle(new Point((int)pos.X + _radiusCorner, pos.Y), new Point(dim.X - _radiusCorner * 2, dim.Y));
                             spritebatch.Draw(texture, rect1, BackgroundColor);
                             Rectangle rect2 = new Rectangle(new Point((int)pos.X, pos.Y + _radiusCorner), new Point(dim.X, dim.Y - _radiusCorner * 2));
                             spritebatch.Draw(texture, rect2, BackgroundColor);
                             spritebatch.MaskCorners(Position, Dimensions, _radiusCorner, BackgroundColor);
-
-                            // Dessin du rectangle intérieur (texture ou couleur de fond)
-                            Rectangle innerRect = new Rectangle((int)Position.X + _thickness / 2, (int)Position.Y + _thickness, (int)(Dimensions.X - 2 * _thickness), (int)(Dimensions.Y - 2 * _thickness));
-                            spritebatch.Draw(texture, innerRect, BackgroundColor);
                         }
                         else
                         {
