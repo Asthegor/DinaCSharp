@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DinaFramework.Services
+namespace DinaCSharp.Services
 {
     /// <summary>
     /// Représente un tag vide utilisé pour typer les clés de service.
@@ -44,5 +44,10 @@ namespace DinaFramework.Services
         /// Clé représentant le gestionnaire de sons.
         /// </summary>
         public static readonly Key<ServiceTag> SoundManager = Key<ServiceTag>.FromString("SoundManager");
+        /// <summary>
+        /// Clé représentant le gestionnaire de ressources.
+        /// </summary>
+        public static readonly Key<ServiceTag> ResourceManager = Key<ServiceTag>.FromString("ResourceManager");
+
     }
 }

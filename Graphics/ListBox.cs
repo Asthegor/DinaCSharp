@@ -1,6 +1,6 @@
-﻿using DinaFramework.Core;
-using DinaFramework.Events;
-using DinaFramework.Interfaces;
+﻿using DinaCSharp.Core;
+using DinaCSharp.Events;
+using DinaCSharp.Interfaces;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -9,12 +9,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DinaFramework.Graphics
+namespace DinaCSharp.Graphics
 {
     /// <summary>
     /// Représente une boîte de liste graphique permettant d'afficher une collection d'éléments avec des fonctionnalités de sélection et de mise à jour.
     /// </summary>
-    public class ListBox : Base, IPosition, IDimensions, IUpdate, IDraw, IElement, IVisible
+    public class ListBox : Base, IPosition, IDimensions, IUpdate, IDraw, IElement, IVisible, IDisposable
     {
         private const float OFFSET_LIST_Y = 2;
         private Vector2 OFFSET_PANEL = new Vector2(5, 5);
@@ -36,6 +36,7 @@ namespace DinaFramework.Graphics
         private readonly int _startIndex;
 
         private Color _defaultSelectionColor;
+        private bool _disposed;
 
         /// <summary>
         /// Initialise une nouvelle instance de la classe ListBox avec les éléments spécifiés.
@@ -280,6 +281,55 @@ namespace DinaFramework.Graphics
                 item.Position = OFFSET_PANEL + new Vector2(0, (_maxElementDimensions.Y + OFFSET_LIST_Y) * (index - startindex));
                 _listVisibleItems.Add(item);
             }
+        }
+
+        /// <summary>
+        /// Libère les ressources utilisées par le ListBox.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Désabonne tous les événements.
+        /// </summary>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed)
+                return;
+
+            if (disposing)
+            {
+                _listGroup.Dispose();
+                _backgroundPanel.Dispose();
+
+                if (OnLeftClick != null)
+                {
+                    foreach (var handler in OnLeftClick.GetInvocationList())
+                        OnLeftClick -= (EventHandler<ListBoxClickEventArgs>)handler;
+                }
+                if (OnRightClick != null)
+                {
+                    foreach (var handler in OnRightClick.GetInvocationList())
+                        OnRightClick -= (EventHandler<ListBoxClickEventArgs>)handler;
+                }
+
+                foreach (var item in _listPanels)
+                    item.Dispose();
+                _listPanels.Clear();
+
+                foreach(var item in _listVisibleItems)
+                {
+                    if (item is IDisposable disposable)
+                        disposable.Dispose();
+                }
+                _listVisibleItems.Clear();
+
+                _elements.Clear();
+            }
+            _disposed = true;
         }
     }
 }

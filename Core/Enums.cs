@@ -1,5 +1,5 @@
 ﻿#pragma warning disable CS1591 // Pour ne pas avoir de warning sur chaque valeur des enums.
-namespace DinaFramework.Enums
+namespace DinaCSharp.Enums
 {
     /// <summary>
     /// Définit les alignements horizontaux possibles pour les éléments de l'interface utilisateur.
@@ -72,5 +72,11 @@ namespace DinaFramework.Enums
     /// Valeurs : None, Small, Medium, Large, XL, XXL
     /// </summary>
     public enum ResolutionFontSize { None, Small, Medium, Large, XL, XXL }
+
+    /// <summary>
+    /// Définit les états possibles d'un élément de l'interface utilisateur.
+    /// Valeurs : Normal, Hovered, Pressed, Locked
+    /// </summary>
+    public enum UIState { Normal, Hovered, Pressed, Locked }
 }
 #pragma warning restore CS1591 // Pour ne pas avoir de warning sur chaque valeur des enums.

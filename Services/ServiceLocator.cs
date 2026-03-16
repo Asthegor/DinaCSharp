@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace DinaFramework.Services
+namespace DinaCSharp.Services
 {
     /// <summary>
     /// Fournit une implémentation simple pour la localisation de services, permettant d'enregistrer, de récupérer et de supprimer des services à l'aide de clés uniques.
@@ -20,7 +20,16 @@ namespace DinaFramework.Services
         public static T? Get<T>(IKey key)
         {
             if (_dictionary != null && _dictionary.TryGetValue(key, out object? result))
-                return (T)result;
+            {
+                if (result is T typedResult)
+                    return typedResult;
+
+                // Message d'erreur explicite
+                throw new InvalidCastException(
+                    $"Le service enregistré pour la clé '{key}' est de type '{result.GetType().Name}', " +
+                    $"mais le type attendu est '{typeof(T).Name}'."
+                );
+            }
             return default;
         }
         /// <summary>

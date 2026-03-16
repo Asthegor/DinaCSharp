@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework.Input;
 
-namespace DinaFramework.Inputs
+namespace DinaCSharp.Inputs
 {
     /// <summary>
     /// Classe représentant un bouton de manette de jeu.

@@ -1,4 +1,4 @@
-﻿using DinaFramework.Internal;
+﻿using DinaCSharp.Internal;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -7,7 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-namespace DinaFramework.Extensions
+namespace DinaCSharp.Extensions
 {
     /// <summary>
     /// Fournit des méthodes d'extension pour convertir entre différents types de données.

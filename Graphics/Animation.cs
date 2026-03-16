@@ -1,5 +1,5 @@
-﻿using DinaFramework.Core;
-using DinaFramework.Interfaces;
+﻿using DinaCSharp.Core;
+using DinaCSharp.Interfaces;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.ObjectModel;
 
-namespace DinaFramework.Graphics
+namespace DinaCSharp.Graphics
 {
     /// <summary>
     /// Représente une animation graphique composée de plusieurs frames (images).
@@ -225,8 +225,8 @@ namespace DinaFramework.Graphics
 }
 
 
-//using DinaFramework.Graphics;
-//using DinaFramework.Interfaces;
+//using DinaCSharp.Graphics;
+//using DinaCSharp.Interfaces;
 
 //using Microsoft.Xna.Framework;
 //using Microsoft.Xna.Framework.Content;
@@ -235,7 +235,7 @@ namespace DinaFramework.Graphics
 //using System;
 //using System.Collections.Generic;
 
-//namespace DinaFramework.Graphics
+//namespace DinaCSharp.Graphics
 //{
 //    public class Animation : Base, IReset, IUpdate, IDraw, IColor, ICollide, IVisible, ICopyable<Animation>
 //    {

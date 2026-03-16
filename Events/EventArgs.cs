@@ -1,12 +1,12 @@
-﻿using DinaFramework.Graphics;
-using DinaFramework.Interfaces;
-using DinaFramework.Menus;
-using DinaFramework.Scenes;
-using DinaFramework.Screen;
+﻿using DinaCSharp.Graphics;
+using DinaCSharp.Interfaces;
+using DinaCSharp.Services.Menus;
+using DinaCSharp.Services.Scenes;
+using DinaCSharp.Services.Screen;
 
 using System;
 
-namespace DinaFramework.Events
+namespace DinaCSharp.Events
 {
     /// <summary>
     /// Contient les informations d'un événement lié à un <see cref="Button"/>.
@@ -109,6 +109,17 @@ namespace DinaFramework.Events
         /// Le panneau qui a déclenché l'événement.
         /// </summary>
         public Panel Panel { get; } = panel;
+    }
+
+    /// <summary>
+    /// Fournit des données pour les événements liés au Polygon.
+    /// </summary>
+    public class PolygonEventArgs(Polygon polygon) : EventArgs, IEventArgs
+    {
+        /// <summary>
+        /// Obtient le Polygon associé à l'événement.
+        /// </summary>
+        public Polygon Polygon { get; } = polygon;
     }
 
     /// <summary>

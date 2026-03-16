@@ -1,13 +1,16 @@
 ﻿#pragma warning disable CS1591 // Les interfaces sont documentées via le summary de l'interface, pas chaque membre abstrait
 #pragma warning disable CA1040 // Interfaces vides intentionnelles pour le typage ou la composition d'autres interfaces
 
+using DinaCSharp.Enums;
+using DinaCSharp.Services;
+
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 using System;
 using System.Collections.Generic;
 
-namespace DinaFramework.Interfaces
+namespace DinaCSharp.Interfaces
 {
     /// <summary>
     /// Définit un objet de jeu complet comprenant le chargement, la réinitialisation, la mise à jour et l'affichage.
@@ -85,7 +88,7 @@ namespace DinaFramework.Interfaces
     public interface IResource
     {
         public abstract bool AddResource<T>(string resourceName, T resource);
-        public abstract T GetResource<T>(string resourceName);
+        public abstract T? GetResource<T>(string resourceName);
         public abstract void RemoveResource(string resourceName);
     }
     /// <summary>
@@ -136,6 +139,10 @@ namespace DinaFramework.Interfaces
     public interface IClickable
     {
         public abstract bool IsClicked();
+        public abstract bool IsLeftClicked();
+        public abstract bool IsRightClicked();
+        public abstract void LeftClick();
+        public abstract void RightClick();
     }
     public interface  IHovered
     {
@@ -159,13 +166,12 @@ namespace DinaFramework.Interfaces
     /// </summary>
     public interface ILoadingScreen
     {
-        public abstract float Progress { get; set; }
-        public abstract string Text { get; set; }
+        public abstract string Message { get; set; }
     }
     /// <summary>
     /// Définit une méthode pour effectuer une copie d'un objet.
     /// </summary>
-    /// <typeparam name="T">Type de l'objet à copier.</typeparam>
+    /// <typeparam name="T">Class de l'objet à copier.</typeparam>
     public interface ICopyable<T>
     {
         public abstract T Copy();
@@ -173,9 +179,13 @@ namespace DinaFramework.Interfaces
     /// <summary>
     /// Définit une propriété pour verrouiller ou déverrouiller un objet.
     /// </summary>
-    public interface ILocked
+    public interface IUIStateful
     {
-        public abstract bool Locked { get; set; }
+        public abstract UIState UIState { get; set; }
+    }
+    public interface IRegister
+    {
+        public void Register(Key<ServiceTag> key);
     }
 }
 #pragma warning restore CA1040

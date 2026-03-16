@@ -1,22 +1,25 @@
-﻿using DinaFramework.Core;
-using DinaFramework.Enums;
-using DinaFramework.Interfaces;
+﻿using DinaCSharp.Core;
+using DinaCSharp.Enums;
+using DinaCSharp.Events;
+using DinaCSharp.Interfaces;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 using System;
 
-namespace DinaFramework.Graphics
+namespace DinaCSharp.Graphics
 {
     /// <summary>
     /// Représente un texte avec une ombre, permettant de gérer la couleur, la position, l'alignement et les effets de temporisation.
     /// </summary>
-    public class ShadowText : Base, IUpdate, IDraw, IColor, IVisible, IText, ICopyable<ShadowText>, IDrawingElement
+    public class ShadowText : Base, IUpdate, IDraw, IColor, IVisible, IText, ICopyable<ShadowText>, IDrawingElement, IDisposable
     {
         private readonly Text _text;
         private readonly Text _shadow;
-        Vector2 _offset;
+        private Vector2 _offset;
+        private bool _disposed;
+
         /// <summary>
         /// Initialise une nouvelle instance de la classe ShadowText avec les paramètres spécifiés.
         /// </summary>
@@ -185,5 +188,31 @@ namespace DinaFramework.Graphics
                 Visible = Visible,
             };
         }
+
+        /// <summary>
+        /// Libère les ressources utilisées par le ShadowText.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Désabonne tous les événements.
+        /// </summary>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed)
+                return;
+
+            if (disposing)
+            {
+                _text.Dispose();
+                _shadow.Dispose();
+            }
+            _disposed = true;
+        }
+
     }
 }

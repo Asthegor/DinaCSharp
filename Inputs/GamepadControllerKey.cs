@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
-namespace DinaFramework.Inputs
+namespace DinaCSharp.Inputs
 {
     /// <summary>
     /// Représente un bouton de manette pour un joueur spécifique.

@@ -1,4 +1,4 @@
-﻿namespace DinaFramework.Functions
+﻿namespace DinaCSharp.Functions
 {
     using Microsoft.Xna.Framework.Graphics;
 

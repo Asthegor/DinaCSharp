@@ -8,7 +8,7 @@ using System.Globalization;
 using System.IO;
 using System.Xml.Linq;
 
-namespace DinaFramework.SpriteSheets
+namespace DinaCSharp.SpriteSheets
 {
 
     /// <summary>
@@ -66,7 +66,6 @@ namespace DinaFramework.SpriteSheets
         /// Charge une spritesheet à partir d’un fichier XML et d’une texture associée.
         /// </summary>
         /// <param name="content">Le ContentManager utilisé pour charger la texture.</param>
-        /// <param name="xmlPath">Chemin du fichier XML décrivant les régions de la spritesheet.</param>
         /// <param name="texturePath">Chemin de la texture associée à la spritesheet.</param>
         /// <returns>
         /// Une instance de <see cref="SpriteSheet"/> contenant la texture et toutes les régions définies.

@@ -1,7 +1,8 @@
 ﻿#nullable enable
-using DinaFramework.Core;
-using DinaFramework.Interfaces;
-using DinaFramework.Services;
+using DinaCSharp.Core;
+using DinaCSharp.Events;
+using DinaCSharp.Interfaces;
+using DinaCSharp.Services;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -10,12 +11,12 @@ using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 
-namespace DinaFramework.Graphics
+namespace DinaCSharp.Graphics
 {
     /// <summary>
     /// Classe représentant un menu déroulant interactif avec des options sélectionnables.
     /// </summary>
-    public class DropDown : Base, IUpdate, IDraw, IVisible, IPosition
+    public class DropDown : Base, IUpdate, IDraw, IVisible, IPosition, IDisposable
     {
         private const int OFFSET_OPTIONS = 2;
 
@@ -35,6 +36,7 @@ namespace DinaFramework.Graphics
 
         private MouseState _oldMouseState;
         private Color _selectedOptionColor;
+        private bool _disposed;
 
         /// <summary>
         /// Initialise une nouvelle instance de la classe DropDown.
@@ -272,6 +274,39 @@ namespace DinaFramework.Graphics
                         option.Draw(spritebatch);
                 }
             }
+        }
+
+        /// <summary>
+        /// Libère les ressources utilisées par le DropDown.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Libère les ressources utilisées par le DropDown.
+        /// </summary>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed)
+                return;
+
+            if (disposing)
+            {
+                _options.Clear();
+
+                _panel.Dispose();
+                _text.Dispose();
+                _panelArrow.Dispose();
+                _panelOptions.Dispose();
+
+                foreach(var  option in _listOptions)
+                    option.Dispose();
+                _listOptions.Clear();
+            }
+            _disposed = true;
         }
     }
 }

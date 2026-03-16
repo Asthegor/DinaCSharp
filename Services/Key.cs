@@ -1,7 +1,7 @@
 ﻿#nullable enable
 using System;
 
-namespace DinaFramework.Services
+namespace DinaCSharp.Services
 {
     /// <summary>
     /// Représente une clé fortement typée pour identifier de manière unique des ressources,
@@ -17,6 +17,7 @@ namespace DinaFramework.Services
         /// Retourne la valeur de la clé sous forme de chaîne.
         /// </summary>
         public string Value => _value;
+
         /// <summary>
         /// Crée une nouvelle clé à partir d'une chaîne.
         /// </summary>

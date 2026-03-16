@@ -1,8 +1,8 @@
-﻿using DinaFramework.Core;
-using DinaFramework.Enums;
-using DinaFramework.Events;
-using DinaFramework.Interfaces;
-using DinaFramework.Localization;
+﻿using DinaCSharp.Core;
+using DinaCSharp.Enums;
+using DinaCSharp.Events;
+using DinaCSharp.Interfaces;
+using DinaCSharp.Services.Localization;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -10,14 +10,16 @@ using Microsoft.Xna.Framework.Input;
 
 using System;
 
-namespace DinaFramework.Graphics
+using static System.Net.Mime.MediaTypeNames;
+
+namespace DinaCSharp.Graphics
 {
     /// <summary>
     /// Représente un texte à afficher avec des options de temporisation et d'alignement.
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1724: Type names should not match namespaces",
         Justification = "Text est clair dans le contexte du framework. Pas d'utilisation de System.Drawing dans le framework.")]
-    public class Text : Base, IUpdate, IDraw, IColor, IVisible, IText, ICopyable<Text>, IDrawingElement
+    public class Text : Base, IUpdate, IDraw, IColor, IVisible, IText, ICopyable<Text>, IDrawingElement, IDisposable
     {
         private SpriteFont _font;
         private string _content;
@@ -39,16 +41,22 @@ namespace DinaFramework.Graphics
 
         private string _wrappedContent = string.Empty;
 
+        private float _rotation;
+        private Vector2 _origin = Vector2.Zero;
+        private bool _disposed;
+        private readonly SpriteEffects _effects = SpriteEffects.None;
+
         /// <summary>
         /// Le contenu du texte.
         /// </summary>
         public string Content
         {
-            get { return _content; }
+            get => _content;
             set
             {
                 _content = value;
                 WrapText();
+                NotifyPropertyChanged();
             }
         }
         /// <summary>
@@ -56,20 +64,21 @@ namespace DinaFramework.Graphics
         /// </summary>
         public Color Color
         {
-            get { return _color; }
-            set { _color = value; }
+            get => _color;
+            set => SetProperty(ref _color, value);
         }
         /// <summary>
         /// Indique si le texte est visible.
         /// </summary>
         public bool Visible
         {
-            get { return _visible; }
+            get => _visible;
             set
             {
                 _visible = value;
                 _timerWaitTime = 0;
                 _timerDisplayTime = 0;
+                NotifyPropertyChanged();
             }
         }
         /// <summary>
@@ -77,11 +86,12 @@ namespace DinaFramework.Graphics
         /// </summary>
         public override Vector2 Position
         {
-            get { return base.Position; }
+            get => base.Position;
             set
             {
                 base.Position = value;
                 UpdateDisplayPosition();
+                NotifyPropertyChanged();
             }
         }
         /// <summary>
@@ -89,12 +99,13 @@ namespace DinaFramework.Graphics
         /// </summary>
         public override Vector2 Dimensions
         {
-            get { return base.Dimensions; }
+            get => base.Dimensions;
             set
             {
                 base.Dimensions = value;
                 WrapText();
                 UpdateDisplayPosition();
+                NotifyPropertyChanged();
             }
         }
         /// <summary>
@@ -107,7 +118,16 @@ namespace DinaFramework.Graphics
             {
                 _font = value;
                 UpdateDisplayPosition();
+                NotifyPropertyChanged();
             }
+        }
+        /// <summary>
+        /// Angle du texte en radians.
+        /// </summary>
+        public float Rotation
+        {
+            get => _rotation;
+            set => SetProperty(ref _rotation, value);
         }
         /// <summary>
         /// Initialise une nouvelle instance de la classe Text.
@@ -209,7 +229,10 @@ namespace DinaFramework.Graphics
                 if (Wrap)
                     spritebatch.DrawString(_font, _wrappedContent ?? "", _displayposition, _color);
                 else
-                    spritebatch.DrawString(_font, LocalizationManager.GetTranslation(Content), _displayposition, _color);
+                {
+                    float zorder = ZOrder > 0 ? 0.5f + (ZOrder / MAX_ZORDER) : (ZOrder / MIN_ZORDER);
+                    spritebatch.DrawString(_font, LocalizationManager.GetTranslation(Content), _displayposition, _color, _rotation, _origin, 1f, _effects, zorder);
+                }
             }
         }
         /// <summary>
@@ -353,6 +376,36 @@ namespace DinaFramework.Graphics
             {
                 base.Dimensions = new Vector2(Dimensions.X, textDim.Y);
             }
+            UpdateDisplayPosition();
         }
+
+        /// <summary>
+        /// Libère les ressources utilisées par le Text.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Désabonne tous les événements.
+        /// </summary>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed)
+                return;
+
+            if (disposing)
+            {
+                if (OnHovered != null)
+                {
+                    foreach (var handler in OnHovered.GetInvocationList())
+                        OnHovered -= (EventHandler<TextEventArgs>)handler;
+                }
+            }
+            _disposed = true;
+        }
+
     }
 }

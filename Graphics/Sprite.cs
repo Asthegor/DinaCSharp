@@ -1,12 +1,12 @@
-﻿using DinaFramework.Core;
-using DinaFramework.Interfaces;
+﻿using DinaCSharp.Core;
+using DinaCSharp.Interfaces;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 using System;
 
-namespace DinaFramework.Graphics
+namespace DinaCSharp.Graphics
 {
     /// <summary>
     /// Représente un sprite (image) avec des propriétés telles que la couleur, la position, la rotation, le redimensionnement et l'effet de réflexion.
@@ -21,6 +21,7 @@ namespace DinaFramework.Graphics
         private SpriteEffects _effects;
         private Vector2 _flip;
         private Vector2 _scale;
+        private float _rotation;
 
         /// <summary>
         /// Initialise une nouvelle instance de la classe Sprite avec les paramètres spécifiés.
@@ -119,7 +120,7 @@ namespace DinaFramework.Graphics
             set
             {
                 ArgumentNullException.ThrowIfNull(value);
-                _texture = value;
+                SetProperty(ref _texture, value);
             }
         }
         /// <summary>
@@ -128,7 +129,7 @@ namespace DinaFramework.Graphics
         public Rectangle Rectangle
         {
             get { return _rectangle; }
-            private set { _rectangle = value; }
+            private set { SetProperty(ref _rectangle, value); }
         }
         /// <summary>
         /// Obtient ou définit la couleur du sprite.
@@ -136,7 +137,7 @@ namespace DinaFramework.Graphics
         public Color Color
         {
             get { return _color; }
-            set { _color = value; }
+            set { SetProperty(ref _color, value); }
         }
         /// <summary>
         /// Obtient ou définit la position du sprite.
@@ -149,6 +150,7 @@ namespace DinaFramework.Graphics
                 base.Position = value;
                 _rectangle.Location = value.ToPoint();
                 //_rectangle.Location = new Point(Convert.ToInt32(value.X - Origin.X), Convert.ToInt32(value.Y - Origin.Y));
+                NotifyPropertyChanged();
             }
         }
         /// <summary>
@@ -166,6 +168,7 @@ namespace DinaFramework.Graphics
             {
                 base.Dimensions = value;
                 _rectangle.Size = new Point(Convert.ToInt32(value.X), Convert.ToInt32(value.Y));
+                NotifyPropertyChanged();
             }
         }
         /// <summary>
@@ -174,7 +177,7 @@ namespace DinaFramework.Graphics
         public Vector2 Origin
         {
             get { return _origin; }
-            set { _origin = value; }
+            set { SetProperty(ref _origin, value); }
         }
         /// <summary>
         /// Centre l'origine du sprite sur son centre.
@@ -186,7 +189,7 @@ namespace DinaFramework.Graphics
         public bool Visible
         {
             get { return _visible; }
-            set { _visible = value; }
+            set { SetProperty(ref _visible, value); }
         }
         /// <summary>
         /// Définit la visibilité du sprite (utilisé dans le MenuManager).
@@ -199,7 +202,11 @@ namespace DinaFramework.Graphics
         /// <summary>
         /// Obtient ou définit la rotation du sprite en radians.
         /// </summary>
-        public float Rotation { get; set; }
+        public float Rotation
+        { 
+            get => _rotation; 
+            set => SetProperty(ref _rotation, value);
+        }
         /// <summary>
         /// Obtient ou définit l'échelle du sprite.
         /// </summary>
@@ -210,6 +217,7 @@ namespace DinaFramework.Graphics
             {
                 _scale = value;
                 _rectangle.Size = new Vector2(Dimensions.X * _scale.X, Dimensions.Y * _scale.Y).ToPoint();
+                NotifyPropertyChanged();
             }
         }
         /// <summary>
@@ -230,6 +238,7 @@ namespace DinaFramework.Graphics
                 if (value.Y < 0)
                     _effects |= SpriteEffects.FlipVertically;
                 _flip = value;
+                NotifyPropertyChanged();
             }
         }
         /// <summary>

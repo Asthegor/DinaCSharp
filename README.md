@@ -1,7 +1,7 @@
 # DinaCSharp
 ➡ [English version](#dinaframework-english)
 
-DinaCSharp est un moteur de jeu personnalisé développé à partir de [MonoGame](https://github.com/MonoGame/MonoGame), conçu pour faciliter la création de jeux multiplateformes en C#.
+DinaCSharp est un framework développé à partir de [MonoGame](https://github.com/MonoGame/MonoGame), conçu pour faciliter la création de jeux multiplateformes en C#.
 
 ## Fonctionnalités
 
@@ -30,14 +30,17 @@ DinaCSharp est un moteur de jeu personnalisé développé à partir de [MonoGame
 
    ```bash
    git clone https://github.com/Asthegor/DinaCSharp.git
-2. Ouvrez le fichier DinaCSharp.sln avec Visual Studio.
+   ```
 
+2. Ouvrez le fichier `DinaCSharp.sln` avec Visual Studio.
 3. Restaurez les packages NuGet nécessaires.
 
 ## Utilisation
 Compilez le projet DinaCSharp.
 
-Ajoutez la DLL générée DinaCSharp.dll à votre projet.
+1. Ajoutez le projet `DinaCSharp` à votre solution.
+2. Ajoutez une référence au projet `DinaCSharp` dans votre projet de jeu.
+3. Vous n'avez plus qu'à utiliser les fonctionnalités du framework lors du développement de votre jeu.
 
 Ajoutez une référence à la dll DinaCSharp.dll dans votre projet de jeu.
 

@@ -1,6 +1,8 @@
-﻿using System;
+﻿#pragma warning disable CA1032 // Implémenter des constructeurs d'exception standard
 
-namespace DinaFramework.Exceptions
+using System;
+
+namespace DinaCSharp.Exceptions
 {
     /// <summary>
     /// Exception levée lorsqu'un type de scène invalide est fourni.
@@ -15,3 +17,5 @@ namespace DinaFramework.Exceptions
     /// </summary>
     public class SpriteBatchNotBeginException() : Exception($"You must launch BeginSpritebatch in order to launch EndSpritebatch.");
 }
+
+#pragma warning restore CA1032 // Implémenter des constructeurs d'exception standard

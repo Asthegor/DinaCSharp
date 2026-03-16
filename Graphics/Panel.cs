@@ -1,8 +1,8 @@
-﻿using DinaFramework.Core;
-using DinaFramework.Events;
-using DinaFramework.Extensions;
-using DinaFramework.Interfaces;
-using DinaFramework.Services;
+﻿using DinaCSharp.Core;
+using DinaCSharp.Events;
+using DinaCSharp.Extensions;
+using DinaCSharp.Interfaces;
+using DinaCSharp.Services;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -13,12 +13,12 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
 
-namespace DinaFramework.Graphics
+namespace DinaCSharp.Graphics
 {
     /// <summary>
     /// Représente un panneau graphique pouvant être dessiné et interactif.
     /// </summary>
-    public class Panel : Base, IClickable, IColor, IDraw, IUpdate, IVisible, ICopyable<Panel>
+    public class Panel : Base, IClickable, IColor, IDraw, IUpdate, IVisible, ICopyable<Panel>, IDisposable
     {
         private Dictionary<string, object> _originalValues = [];
         private List<string> _modifiedHoverValues = [];
@@ -38,6 +38,7 @@ namespace DinaFramework.Graphics
         private bool _rightClicked;
         private bool _hover;
         private bool _hoverInvoked;
+        private bool _disposed;
         private readonly bool _withRoundCorner;
         private readonly int _radiusCorner;
 
@@ -68,7 +69,7 @@ namespace DinaFramework.Graphics
         /// <param name="withroundcorner"></param>
         /// <param name="radius"></param>
         /// <param name="zorder">Ordre de superposition (facultatif).</param>
-        public Panel(Vector2 position, Vector2 dimensions, Color backgroundcolor, Color bordercolor, int thickness, bool withroundcorner = false, int radius = 0, int zorder = 0) :
+        public Panel(Vector2 position, Vector2 dimensions, Color backgroundcolor, Color bordercolor, int thickness = 0, bool withroundcorner = false, int radius = 0, int zorder = 0) :
             this(position, dimensions, backgroundcolor, zorder)
         {
             BorderColor = bordercolor;
@@ -88,7 +89,7 @@ namespace DinaFramework.Graphics
         /// <param name="withroundcorner">Indique si on veut des coins arrondis.</param>
         /// <param name="radius">Rayon de l'arrondi.</param>
         /// <param name="zorder">L'ordre Z du panneau (par défaut 0).</param>
-        public Panel(Vector2 position, Vector2 dimensions, Texture2D image, int borderThickness, bool withroundcorner = false, int radius = 0, int zorder = 0) :
+        public Panel(Vector2 position, Vector2 dimensions, Texture2D image, int borderThickness = 0, bool withroundcorner = false, int radius = 0, int zorder = 0) :
             base(position, dimensions, zorder)
         {
             ArgumentNullException.ThrowIfNull(image);
@@ -96,7 +97,7 @@ namespace DinaFramework.Graphics
             BackgroundColor = Color.White;
             _images.Add(image);
             _positions.Add(position);
-            _thickness = borderThickness;
+            Thickness = borderThickness;
             if (Dimensions == default)
                 Dimensions = new Vector2(image.Width, image.Height);
             CheckVisibility();
@@ -119,7 +120,8 @@ namespace DinaFramework.Graphics
         /// <param name="middleLeft">Texture du bord gauche.</param>
         /// <param name="middleCenter">Texture du centre du panneau.</param>
         /// <param name="zorder">L'ordre Z du panneau (par défaut 0).</param>
-        public Panel(Vector2 position, Vector2 dimensions, Texture2D topLeft, Texture2D topCenter, Texture2D topRight, Texture2D middleLeft, Texture2D middleCenter, Texture2D middleRight, Texture2D bottomLeft, Texture2D bottomCenter, Texture2D bottomRight, int zorder = 0) : base(position, dimensions, zorder)
+        public Panel(Vector2 position, Vector2 dimensions, Texture2D topLeft, Texture2D topCenter, Texture2D topRight, Texture2D middleLeft, Texture2D middleCenter, Texture2D middleRight, Texture2D bottomLeft, Texture2D bottomCenter, Texture2D bottomRight, int zorder = 0) :
+            base(position, dimensions, zorder)
         {
             ArgumentNullException.ThrowIfNull(topLeft);
             ArgumentNullException.ThrowIfNull(topCenter);
@@ -221,11 +223,8 @@ namespace DinaFramework.Graphics
         {
             SetBackgroundRectangle();
             if (_thickness > 0 && BorderColor != BackgroundColor)
-            {
-                _rectangleBorder = new Rectangle(Convert.ToInt32(Position.X - _thickness), Convert.ToInt32(Position.Y - _thickness), Convert.ToInt32(Dimensions.X + _thickness * 2), Convert.ToInt32(Dimensions.Y + _thickness * 2));
-                _rectangleBackground.Location += new Point(Convert.ToInt32(Math.Ceiling(_thickness / 2.0f)), Convert.ToInt32(Math.Ceiling(_thickness / 2.0f)));
-                _rectangleBackground.Size -= new Point(_thickness, _thickness);
-            }
+                _rectangleBorder = new Rectangle(Convert.ToInt32(Position.X - _thickness), Convert.ToInt32(Position.Y - _thickness), 
+                                                 Convert.ToInt32(Dimensions.X + _thickness * 2), Convert.ToInt32(Dimensions.Y + _thickness * 2));
         }
         private void CheckVisibility()
         {
@@ -256,7 +255,10 @@ namespace DinaFramework.Graphics
         public void SetImage(Texture2D image)
         {
             ArgumentNullException.ThrowIfNull(image, nameof(image));
-            _images[0] = image;
+            if(_images.Count == 0)
+                _images.Add(image);
+            else
+                _images[0] = image;
         }
         /// <summary>
         /// Redéfinit les images du panneau.
@@ -307,6 +309,7 @@ namespace DinaFramework.Graphics
                 switch (_images.Count)
                 {
                     case 0:
+                    {
                         Texture2D? texture = ServiceLocator.Get<Texture2D>(ServiceKeys.Texture1px)
                             ?? throw new InvalidOperationException("Texture1px non enregistrée dans le ServiceLocator");
 
@@ -314,25 +317,36 @@ namespace DinaFramework.Graphics
                         {
                             Point pos = Position.ToPoint();
                             Point dim = Dimensions.ToPoint();
+
+                            if (_thickness > 0 && BorderColor != BackgroundColor)
+                            {
+                                // Dessiner la bordure (rectangle extérieur avec coins arrondis)
+                                int borderRadius = _radiusCorner + _thickness / 2;
+                                Rectangle borderRect1 = new Rectangle(new Point((int)pos.X - _thickness + borderRadius, pos.Y - _thickness), new Point(dim.X + _thickness * 2 - borderRadius * 2, dim.Y + _thickness * 2));
+                                spritebatch.Draw(texture, borderRect1, BorderColor);
+                                Rectangle borderRect2 = new Rectangle(new Point((int)pos.X - _thickness, pos.Y - _thickness + borderRadius), new Point(dim.X + _thickness * 2, dim.Y + _thickness * 2 - borderRadius * 2));
+                                spritebatch.Draw(texture, borderRect2, BorderColor);
+                                spritebatch.MaskCorners(new Vector2(pos.X - _thickness, pos.Y - _thickness), new Vector2(dim.X + _thickness * 2, dim.Y + _thickness * 2), borderRadius, BorderColor);
+                            }
+
+                            // Dessiner le fond (rectangle intérieur avec coins arrondis)
                             Rectangle rect1 = new Rectangle(new Point((int)pos.X + _radiusCorner, pos.Y), new Point(dim.X - _radiusCorner * 2, dim.Y));
                             spritebatch.Draw(texture, rect1, BackgroundColor);
                             Rectangle rect2 = new Rectangle(new Point((int)pos.X, pos.Y + _radiusCorner), new Point(dim.X, dim.Y - _radiusCorner * 2));
                             spritebatch.Draw(texture, rect2, BackgroundColor);
                             spritebatch.MaskCorners(Position, Dimensions, _radiusCorner, BackgroundColor);
-
-                            // Dessin du rectangle intérieur (texture ou couleur de fond)
-                            Rectangle innerRect = new Rectangle((int)Position.X + _thickness / 2, (int)Position.Y + _thickness, (int)(Dimensions.X - 2 * _thickness), (int)(Dimensions.Y - 2 * _thickness));
-                            spritebatch.Draw(texture, innerRect, BackgroundColor);
                         }
                         else
                         {
                             spritebatch.Draw(texture, _rectangleBackground, BackgroundColor);
                             if (_thickness > 0 && BorderColor != BackgroundColor)
-                                spritebatch.DrawRectangle(texture, _rectangleBackground, BorderColor, _thickness);
+                                spritebatch.DrawRectangle(texture, _rectangleBorder, BorderColor, _thickness);
                         }
 
                         break;
+                    }
                     case 1:
+                    {
                         if (_thickness == 0)
                         {
                             spritebatch.Draw(_images[0],
@@ -343,43 +357,51 @@ namespace DinaFramework.Graphics
                         else
                         {
                             var img = _images[0];
-                            int x = (int)_positions[0].X;
-                            int y = (int)_positions[0].Y;
-                            int w = (int)Dimensions.X;
-                            int h = (int)Dimensions.Y;
-                            int iw = img.Width;
-                            int ih = img.Height;
-                            int t = _thickness;
+                            //int x = (int)_positions[0].X;
+                            //int y = (int)_positions[0].Y;
+                            //int w = (int)Dimensions.X;
+                            //int h = (int)Dimensions.Y;
+                            //int iw = img.Width;
+                            //int ih = img.Height;
+                            //int t = _thickness;
 
-                            // Top Left
-                            spritebatch.Draw(img, new Rectangle(x, y, t, t), new Rectangle(0, 0, t, t), BackgroundColor);
+                            //// Top Left
+                            //spritebatch.Draw(img, new Rectangle(x, y, t, t), new Rectangle(0, 0, t, t), BackgroundColor);
 
-                            // Top
-                            spritebatch.Draw(img, new Rectangle(x + t, y, w - 2 * t, t), new Rectangle(t, 0, iw - 2 * t, t), BackgroundColor);
+                            //// Top
+                            //spritebatch.Draw(img, new Rectangle(x + t, y, w - 2 * t, t), new Rectangle(t, 0, iw - 2 * t, t), BackgroundColor);
 
-                            // Top Right
-                            spritebatch.Draw(img, new Rectangle(x + w - t, y, t, t), new Rectangle(iw - t, 0, t, t), BackgroundColor);
+                            //// Top Right
+                            //spritebatch.Draw(img, new Rectangle(x + w - t, y, t, t), new Rectangle(iw - t, 0, t, t), BackgroundColor);
 
-                            // Right
-                            spritebatch.Draw(img, new Rectangle(x + w - t, y + t, t, h - 2 * t), new Rectangle(iw - t, t, t, ih - 2 * t), BackgroundColor);
+                            //// Right
+                            //spritebatch.Draw(img, new Rectangle(x + w - t, y + t, t, h - 2 * t), new Rectangle(iw - t, t, t, ih - 2 * t), BackgroundColor);
 
-                            // Bottom Right
-                            spritebatch.Draw(img, new Rectangle(x + w - t, y + h - t, t, t), new Rectangle(iw - t, ih - t, t, t), BackgroundColor);
+                            //// Bottom Right
+                            //spritebatch.Draw(img, new Rectangle(x + w - t, y + h - t, t, t), new Rectangle(iw - t, ih - t, t, t), BackgroundColor);
 
-                            // Bottom
-                            spritebatch.Draw(img, new Rectangle(x + t, y + h - t, w - 2 * t, t), new Rectangle(t, ih - t, iw - 2 * t, t), BackgroundColor);
+                            //// Bottom
+                            //spritebatch.Draw(img, new Rectangle(x + t, y + h - t, w - 2 * t, t), new Rectangle(t, ih - t, iw - 2 * t, t), BackgroundColor);
 
-                            // Bottom Left
-                            spritebatch.Draw(img, new Rectangle(x, y + h - t, t, t), new Rectangle(0, ih - t, t, t), BackgroundColor);
+                            //// Bottom Left
+                            //spritebatch.Draw(img, new Rectangle(x, y + h - t, t, t), new Rectangle(0, ih - t, t, t), BackgroundColor);
 
-                            // Left
-                            spritebatch.Draw(img, new Rectangle(x, y + t, t, h - 2 * t), new Rectangle(0, t, t, ih - 2 * t), BackgroundColor);
+                            //// Left
+                            //spritebatch.Draw(img, new Rectangle(x, y + t, t, h - 2 * t), new Rectangle(0, t, t, ih - 2 * t), BackgroundColor);
 
-                            // Center
-                            spritebatch.Draw(img, new Rectangle(x + t, y + t, w - 2 * t, h - 2 * t), new Rectangle(t, t, iw - 2 * t, ih - 2 * t), BackgroundColor);
+                            //// Center
+                            //spritebatch.Draw(img, new Rectangle(x + t, y + t, w - 2 * t, h - 2 * t), new Rectangle(t, t, iw - 2 * t, ih - 2 * t), BackgroundColor);
+
+                            spritebatch.Draw(img, new Rectangle(Position.ToPoint(), Dimensions.ToPoint()), BackgroundColor);
+
+                            Texture2D? texture = ServiceLocator.Get<Texture2D>(ServiceKeys.Texture1px)
+                                ?? throw new InvalidOperationException("Texture1px non enregistrée dans le ServiceLocator");
+                            spritebatch.DrawRectangle(texture,new Rectangle(Position.ToPoint(), Dimensions.ToPoint()), BorderColor, _thickness);
                         }
                         break;
+                    }
                     case 9:
+                    {
                         // Corner Top Left
                         spritebatch.Draw(_images[0], _positions[0], BackgroundColor);
                         // Top
@@ -429,6 +451,7 @@ namespace DinaFramework.Graphics
                                          new Rectangle(0, 0, _images[8].Width, _images[8].Height),
                                          BackgroundColor);
                         break;
+                    }
                     default:
                         throw new InvalidEnumArgumentException("Images missing for the obj.");
                 }
@@ -597,6 +620,62 @@ namespace DinaFramework.Graphics
                 }
             }
         }
+        /// <summary>
+        /// Simule un clic gauche sur le Panel.
+        /// </summary>
+        public void LeftClick()
+        {
+            OnClicked?.Invoke(this, new PanelEventArgs(this));
+        }
+        /// <summary>
+        /// Simule un clic droit sur le Panel.
+        /// </summary>
+        public void RightClick()
+        {
+            OnRightClicked?.Invoke(this, new PanelEventArgs(this));
+        }
 
+        /// <summary>
+        /// Libère les ressources utilisées par le Panel.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Désabonne tous les événements.
+        /// </summary>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed)
+                return;
+
+            if (disposing)
+            {
+                if (OnHovered != null)
+                {
+                    foreach (var handler in OnHovered.GetInvocationList())
+                        OnHovered -= (EventHandler<PanelEventArgs>)handler;
+                }
+                if (OnClicked != null)
+                {
+                    foreach (var handler in OnClicked.GetInvocationList())
+                        OnClicked -= (EventHandler<PanelEventArgs>)handler;
+                }
+                if (OnRightClicked != null)
+                {
+                    foreach (var handler in OnRightClicked.GetInvocationList())
+                        OnRightClicked -= (EventHandler<PanelEventArgs>)handler;
+                }
+                _originalValues.Clear();
+                _modifiedClickValues.Clear();
+                _modifiedHoverValues.Clear();
+                _positions.Clear();
+                _images.Clear();
+            }
+            _disposed = true;
+        }
     }
 }
