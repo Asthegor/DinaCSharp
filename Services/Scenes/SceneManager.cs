@@ -2,7 +2,7 @@
 using DinaCSharp.Exceptions;
 using DinaCSharp.Functions;
 using DinaCSharp.Inputs;
-using DinaCSharp.Interfaces;
+using DinaCSharp.Core.Interfaces;
 using DinaCSharp.Internal;
 using DinaCSharp.Services.Screen;
 
@@ -36,7 +36,7 @@ namespace DinaCSharp.Services.Scenes
             lock (_mutex)
             {
                 _singleton ??= new SceneManager(game);
-                _singleton.Register(ServiceKeys.SceneManager);
+                _singleton.Register(DinaServiceKeys.SceneManager);
             }
             return _singleton;
         }
@@ -80,7 +80,7 @@ namespace DinaCSharp.Services.Scenes
             GraphicsDevice = source.GraphicsDevice;
             _content = new ContentManager(_game.Services, contentRootDirectory);
 
-            _screenManager = ServiceLocator.Get<ScreenManager>(ServiceKeys.ScreenManager)
+            _screenManager = ServiceLocator.Get<ScreenManager>(DinaServiceKeys.ScreenManager)
                 ?? throw new InvalidOperationException("ScreenManager non enregistré dans le ServiceLocator.");
             _screenManager.OnResolutionChanged += HandleSceneManagerResolutionChanged;
 
@@ -97,15 +97,15 @@ namespace DinaCSharp.Services.Scenes
             GraphicsDevice = game.GraphicsDevice;
             _currentScene = null;
             _loadingScreen = null;
-            _screenManager = ServiceLocator.Get<ScreenManager>(ServiceKeys.ScreenManager)
+            _screenManager = ServiceLocator.Get<ScreenManager>(DinaServiceKeys.ScreenManager)
                 ?? throw new InvalidOperationException("ScreenManager non enregistré dans le ServiceLocator.");
             _screenManager.OnResolutionChanged += HandleSceneManagerResolutionChanged;
 
             _updateInputManager = true;
 
             // Enregistrement des textures dans le ServiceLocator
-            ServiceLocator.Register(ServiceKeys.Texture1px, InternalAssets.Pixel(GraphicsDevice));
-            ServiceLocator.Register(ServiceKeys.DropDownArrow, InternalAssets.DropDownArrow(GraphicsDevice));
+            ServiceLocator.Register(DinaServiceKeys.Texture1px, InternalAssets.Pixel(GraphicsDevice));
+            ServiceLocator.Register(DinaServiceKeys.DropDownArrow, InternalAssets.DropDownArrow(GraphicsDevice));
         }
         #endregion
 
@@ -162,10 +162,10 @@ namespace DinaCSharp.Services.Scenes
                 _nextSceneWithLoading = withLoadingScreen;
 
                 // Ajoute la scène interne du framework (non visible par l’utilisateur)
-                if (!_scenes.ContainsKey(SceneKeys.FrameworkLogo))
-                    AddScene(SceneKeys.FrameworkLogo, () => new FrameworkLogoScene(this));
+                if (!_scenes.ContainsKey(DinaSceneKeys.FrameworkLogo))
+                    AddScene(DinaSceneKeys.FrameworkLogo, () => new FrameworkLogoScene(this));
 
-                DinaFunctions.FireAndForget(BaseSetCurrentScene(SceneKeys.FrameworkLogo, false));
+                DinaFunctions.FireAndForget(BaseSetCurrentScene(DinaSceneKeys.FrameworkLogo, false));
                 return;
             }
 

@@ -10,7 +10,7 @@ namespace DinaCSharp.Services
     /// Représente une clé unique et immuable pour identifier un service dans le framework.
     /// Fournit des méthodes utilitaires pour la création, la comparaison et la conversion de clés de service.
     /// </summary>
-    public static class ServiceKeys
+    public static class DinaServiceKeys
     {
         /// <summary>
         /// Clé représentant le gestionnaire de scènes.

@@ -1,7 +1,7 @@
 ﻿using DinaCSharp.Core;
 using DinaCSharp.Events;
 using DinaCSharp.Extensions;
-using DinaCSharp.Interfaces;
+using DinaCSharp.Core.Interfaces;
 using DinaCSharp.Services;
 
 using Microsoft.Xna.Framework;
@@ -226,7 +226,7 @@ namespace DinaCSharp.Graphics
             if (!Visible || _vertices.Length < 3)
                 return;
 
-            Texture2D? texture = ServiceLocator.Get<Texture2D>(ServiceKeys.Texture1px)
+            Texture2D? texture = ServiceLocator.Get<Texture2D>(DinaServiceKeys.Texture1px)
                 ?? throw new InvalidOperationException("Texture1px non enregistrée dans le ServiceLocator");
 
             // Dessiner le remplissage du polygone (triangulation simple pour polygones convexes)

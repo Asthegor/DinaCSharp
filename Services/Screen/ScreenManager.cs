@@ -1,6 +1,6 @@
-﻿using DinaCSharp.Core.Utils;
-using DinaCSharp.Events;
-using DinaCSharp.Interfaces;
+﻿using DinaCSharp.Events;
+using DinaCSharp.Core.Interfaces;
+using DinaCSharp.Utils;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;

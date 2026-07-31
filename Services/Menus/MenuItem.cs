@@ -1,7 +1,7 @@
 ﻿using DinaCSharp.Core;
+using DinaCSharp.Core.Interfaces;
 using DinaCSharp.Enums;
 using DinaCSharp.Graphics;
-using DinaCSharp.Interfaces;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -105,7 +105,7 @@ namespace DinaCSharp.Services.Menus
             {
                 if (_item is IText itemText)
                     return itemText.TextDimensions;
-                return default;
+                return Dimensions;
             }
         }
         /// <summary>
@@ -303,7 +303,11 @@ namespace DinaCSharp.Services.Menus
             _wasClicked = _isClicked;
         }
 
-
+        public void SetAlignments(HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignment)
+        {
+            if (_item is IText text)
+                text.SetAlignments(horizontalAlignment, verticalAlignment);
+        }
 
         //private Dictionary<string, object> SaveValues()
         //{

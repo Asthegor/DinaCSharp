@@ -169,17 +169,6 @@ namespace DinaCSharp.Services.Localization
             foreach (var directory in Directory.GetDirectories(directoryPath))
             {
                 var cultureName = Path.GetFileName(directory);
-                //try
-                //{
-                //    var culture = new CultureInfo(cultureName);
-                //    var satellitePath = Path.Combine(directory, $"{assembly.GetName().Name}.resources.dll");
-                //    if (File.Exists(satellitePath))
-                //        cultures.Add(cultureName);
-                //}
-                //catch (CultureNotFoundException)
-                //{
-                //    // Ignorer les dossiers non valides, mais ne pas bloquer la recherche des autres sous-répertoires
-                //}
                 if (CultureInfo.GetCultures(CultureTypes.AllCultures)
                     .Any(c => c.Name.Equals(cultureName, StringComparison.OrdinalIgnoreCase)))
                 {

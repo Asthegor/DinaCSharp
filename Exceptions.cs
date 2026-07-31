@@ -2,7 +2,9 @@
 
 using System;
 
+#pragma warning disable IDE0130 // Le namespace ne correspond pas à la structure de dossiers
 namespace DinaCSharp.Exceptions
+#pragma warning restore IDE0130 // Le namespace ne correspond pas à la structure de dossiers
 {
     /// <summary>
     /// Exception levée lorsqu'un type de scène invalide est fourni.

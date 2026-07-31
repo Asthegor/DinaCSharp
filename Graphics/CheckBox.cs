@@ -2,7 +2,7 @@
 using DinaCSharp.Enums;
 using DinaCSharp.Events;
 using DinaCSharp.Extensions;
-using DinaCSharp.Interfaces;
+using DinaCSharp.Core.Interfaces;
 using DinaCSharp.Services;
 
 using Microsoft.Xna.Framework;
@@ -216,7 +216,7 @@ namespace DinaCSharp.Graphics
 
             bool filled = State == CheckBoxState.Checked && texture == null;
 
-            Texture2D pixel = ServiceLocator.Get<Texture2D>(ServiceKeys.Texture1px)
+            Texture2D pixel = ServiceLocator.Get<Texture2D>(DinaServiceKeys.Texture1px)
                 ?? throw new InvalidOperationException("Texture1px n'est pas enregistré dans le ServiceLocator.");
             spritebatch.DrawRectangle(pixel, _checkBoxRect, color, isFilled: filled);
 

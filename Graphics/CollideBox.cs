@@ -1,4 +1,4 @@
-﻿using DinaCSharp.Interfaces;
+﻿using DinaCSharp.Core.Interfaces;
 
 using Microsoft.Xna.Framework;
 

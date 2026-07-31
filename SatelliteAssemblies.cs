@@ -4,7 +4,9 @@ using System;
 using System.IO;
 using System.Reflection;
 
+#pragma warning disable IDE0130 // Le namespace ne correspond pas à la structure de dossiers
 namespace DinaCSharp.Assemblies
+#pragma warning restore IDE0130 // Le namespace ne correspond pas à la structure de dossiers
 {
     /// <summary>
     /// Fournit des méthodes pour charger les assemblages satellites basés sur les ressources localisées.

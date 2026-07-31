@@ -1,4 +1,4 @@
-﻿using DinaCSharp.Interfaces;
+﻿using DinaCSharp.Core.Interfaces;
 using DinaCSharp.Services.Screen;
 
 using Microsoft.Xna.Framework.Content;
@@ -60,9 +60,9 @@ namespace DinaCSharp.Services.Fonts
         /// <param name="key">Clé associée à la font.</param>
         public SpriteFont Load(Key<FontTag> key)
         {
-            var profile = ServiceLocator.Get<FontProfile>(ServiceKeys.FontProfile)
+            var profile = ServiceLocator.Get<FontProfile>(DinaServiceKeys.FontProfile)
                 ?? throw new InvalidOperationException("FontProfile doit être initialisé avant de charger des fonts.");
-            ScreenManager? screenManager = ServiceLocator.Get<ScreenManager>(ServiceKeys.ScreenManager)
+            ScreenManager? screenManager = ServiceLocator.Get<ScreenManager>(DinaServiceKeys.ScreenManager)
                 ?? throw new InvalidOperationException("ScreenManager doit être enregistré dans le ServiceLocator avant de charger des fonts.");
             var resolution = screenManager.CurrentResolution;
 

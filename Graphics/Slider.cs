@@ -1,9 +1,8 @@
 ﻿#nullable enable
 
 using DinaCSharp.Core;
+using DinaCSharp.Core.Interfaces;
 using DinaCSharp.Enums;
-using DinaCSharp.Events;
-using DinaCSharp.Interfaces;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -26,7 +25,7 @@ namespace DinaCSharp.Graphics
         private float _maxValue;
         private float _step;
         private float _value;
-
+        private float _thumbWidth;
         /// <summary>
         /// Valeur minimale du slider.
         /// </summary>
@@ -65,6 +64,10 @@ namespace DinaCSharp.Graphics
                 value = MathHelper.Clamp(value, MinValue, MaxValue);
                 if (Step > 0)
                     value = (float)Math.Round(value / Step) * Step;
+
+                if (_value == value)
+                    return;
+
                 SetProperty(ref _value, value);
                 UpdateThumbPosition();
             }
@@ -75,10 +78,10 @@ namespace DinaCSharp.Graphics
         /// </summary>
         public ProgressDirection SliderOrientation { get; set; }
 
-        /// <summary>
-        /// Action appelée lorsque la valeur du slider change.
-        /// </summary>
-        public event EventHandler<SliderValueEventArgs>? OnValueChanged;
+        ///// <summary>
+        ///// Action appelée lorsque la valeur du slider change.
+        ///// </summary>
+        //public event EventHandler<SliderValueEventArgs>? OnValueChanged;
         /// <summary>
         /// Position du slider.
         /// </summary>
@@ -126,13 +129,14 @@ namespace DinaCSharp.Graphics
         /// <param name="step">Incrément minimal.</param>
         /// <param name="orientation">Direction de progression du slider.</param>
         /// <param name="zorder"></param>
-        public Slider(Vector2 position, Vector2 dimensions, float minValue, float maxValue, float initialValue, float step = 1f, ProgressDirection orientation = ProgressDirection.LeftToRight, int zorder = 0)
+        public Slider(Vector2 position, Vector2 dimensions, float minValue, float maxValue, float initialValue, float step = 1f, ProgressDirection orientation = ProgressDirection.LeftToRight, float thumbWidth = 0f, int zorder = 0)
             : base(position, dimensions, zorder)
         {
             MinValue = minValue;
             MaxValue = maxValue;
             Step = step;
             SliderOrientation = orientation;
+            _thumbWidth = thumbWidth;
 
             _track = new Panel(position, dimensions, Color.Gray);
 
@@ -275,14 +279,14 @@ namespace DinaCSharp.Graphics
             {
                 // Horizontal : thumb fait toute la hauteur, largeur = hauteur / 4
                 float height = Dimensions.Y;
-                float width = height / 4f;
+                float width = _thumbWidth > 0f ? _thumbWidth : height / 4f;
                 thumbSize = new Vector2(width, height);
             }
             else
             {
                 // Vertical : thumb fait toute la largeur, hauteur = largeur / 4
                 float width = Dimensions.X;
-                float height = width / 4f;
+                float height = _thumbWidth > 0f ? _thumbWidth : width / 4f;
                 thumbSize = new Vector2(width, height);
             }
             return thumbSize;
@@ -310,11 +314,11 @@ namespace DinaCSharp.Graphics
                 _capturedSlider = null;
                 _track.Dispose();
                 _thumb.Dispose();
-                if (OnValueChanged != null)
-                {
-                    foreach (var handler in OnValueChanged.GetInvocationList())
-                        OnValueChanged -= (EventHandler<SliderValueEventArgs>)handler;
-                }
+                //if (OnValueChanged != null)
+                //{
+                //    foreach (var handler in OnValueChanged.GetInvocationList())
+                //        OnValueChanged -= (EventHandler<SliderValueEventArgs>)handler;
+                //}
             }
             _disposed = true;
         }

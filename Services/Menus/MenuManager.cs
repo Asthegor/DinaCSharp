@@ -1,8 +1,9 @@
 ﻿using DinaCSharp.Core;
+using DinaCSharp.Core.Interfaces;
 using DinaCSharp.Enums;
 using DinaCSharp.Graphics;
 using DinaCSharp.Inputs;
-using DinaCSharp.Interfaces;
+using DinaCSharp.Resources;
 using DinaCSharp.Services.Scenes;
 
 using Microsoft.Xna.Framework;
@@ -30,7 +31,9 @@ namespace DinaCSharp.Services.Menus
         private readonly Dictionary<MenuAction, IKey> _actionKeys = [];
 
         private static Vector2 DEFAULT_SPACING = new Vector2(5, 5);
-        private static SceneManager SceneManager => ServiceLocator.Get<SceneManager>(ServiceKeys.SceneManager) ?? throw new InvalidOperationException("SceneManager non enregistrée dans le ServiceLocator");
+        private static SceneManager SceneManager => ServiceLocator.Get<SceneManager>(DinaServiceKeys.SceneManager) ?? throw new InvalidOperationException("SceneManager non enregistrée dans le ServiceLocator");
+        private static ResourceManager ResourceManager => ServiceLocator.Get<ResourceManager>(DinaServiceKeys.ResourceManager) ?? throw new InvalidOperationException("ResourceManager non enregistré dans le ServiceLocator");
+
         private Vector2 _iconSpacing = DEFAULT_SPACING;
         private readonly List<IElement> _elements = [];
         private readonly List<IText> _titles = [];
@@ -165,11 +168,11 @@ namespace DinaCSharp.Services.Menus
         /// <param name="shadowoffset">Décalage de l'ombre (facultatif).</param>
         /// <param name="zorder">Ordre de superposition du titre.</param>
         /// <returns>L'élément titre ajouté.</returns>
-        public IText AddTitle(SpriteFont font, string text, Vector2 position, Color color, Color? shadowcolor = null, Vector2? shadowoffset = null, int zorder = 0)
+        public IText AddTitle(SpriteFont font, string text, Color color, Vector2 position = default, Color? shadowcolor = null, Vector2? shadowoffset = null, int zorder = 0)
         {
             IText title;
             if (shadowcolor.HasValue && shadowoffset.HasValue)
-                title = new ShadowText(font, text, color, position, shadowcolor.Value, shadowoffset.Value, zorder: zorder);
+                title = new ShadowText(font, text, color, shadowcolor.Value, shadowoffset.Value, position, zorder: zorder);
             else
                 title = new Text(font, text, color, position, zorder: zorder);
             AddTitleToGroups(title);
@@ -226,6 +229,29 @@ namespace DinaCSharp.Services.Menus
         /// <summary>
         /// Définit les icônes du menu, incluant leur alignement et leur espacement.
         /// </summary>
+        /// <param name="iconLeftKey">Clé de l'icône gauche dans le ResourceManager.</param>
+        /// <param name="iconRightKey">Clé de l'icône droite dans le ResourceManager.</param>
+        /// <param name="iconAlignment">Alignement des icônes.</param>
+        /// <param name="iconSpacing">Espacement entre les icônes.</param>
+        /// <param name="resize">Indique si les icônes doivent être redimensionnées.</param>
+        public void SetIconItems(Key<ResourceTag> iconLeftKey = default, Key<ResourceTag> iconRightKey = default,
+                                 IconMenuAlignment iconAlignment = IconMenuAlignment.Left,
+                                 Vector2 iconSpacing = default,
+                                 bool resize = false)
+        {
+            Texture2D? iconLeft = null;
+            if (!string.IsNullOrEmpty(iconLeftKey.Value))
+                iconLeft = ResourceManager.Load<Texture2D>(iconLeftKey);
+            Texture2D? iconRight = null;
+            if (!string.IsNullOrEmpty(iconRightKey.Value))
+                iconRight = ResourceManager.Load<Texture2D>(iconRightKey);
+
+            SetIconItems(iconLeft, iconRight, iconAlignment, iconSpacing, resize);
+        }
+
+        /// <summary>
+        /// Définit les icônes du menu, incluant leur alignement et leur espacement.
+        /// </summary>
         /// <param name="iconLeft">Icône gauche.</param>
         /// <param name="iconRight">Icône droite.</param>
         /// <param name="iconAlignment">Alignement des icônes.</param>
@@ -233,7 +259,7 @@ namespace DinaCSharp.Services.Menus
         /// <param name="resize">Indique si les icônes doivent être redimensionnées.</param>
         public void SetIconItems(Texture2D? iconLeft = null, Texture2D? iconRight = null,
                                  IconMenuAlignment iconAlignment = IconMenuAlignment.Left,
-                                 Vector2 iconSpacing = new Vector2(),
+                                 Vector2 iconSpacing = default,
                                  bool resize = false)
         {
             IconAlignment = iconAlignment;
@@ -586,11 +612,11 @@ namespace DinaCSharp.Services.Menus
         }
         private float GetNextItemYPosition()
         {
-            return ItemsDimensions.Y + (_itemsGroup.Count() > 0 ? _itemspacing.Y : 0.0f);
+            return ItemsDimensions.Y + (_itemsGroup.Count > 0 ? _itemspacing.Y : 0.0f);
         }
         private float GetNextItemXPosition()
         {
-            return ItemsDimensions.X + (_itemsGroup.Count() > 0 ? _itemspacing.X : 0.0f);
+            return ItemsDimensions.X + (_itemsGroup.Count > 0 ? _itemspacing.X : 0.0f);
         }
 
         /// <summary>

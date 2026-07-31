@@ -1,9 +1,8 @@
-﻿
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 
 using System;
 
-namespace DinaCSharp.Core.Utils
+namespace DinaCSharp.Utils
 {
     /// <summary>
     /// Permet de scaler les éléments UI en fonction de la résolution de l'écran.

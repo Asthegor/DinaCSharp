@@ -1,5 +1,5 @@
 ﻿using DinaCSharp.Core;
-using DinaCSharp.Interfaces;
+using DinaCSharp.Core.Interfaces;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -226,7 +226,7 @@ namespace DinaCSharp.Graphics
 
 
 //using DinaCSharp.Graphics;
-//using DinaCSharp.Interfaces;
+//using DinaCSharp.Core.Interfaces;
 
 //using Microsoft.Xna.Framework;
 //using Microsoft.Xna.Framework.Content;

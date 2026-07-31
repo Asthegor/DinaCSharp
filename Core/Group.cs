@@ -1,6 +1,6 @@
-﻿using DinaCSharp.Extensions;
+using DinaCSharp.Core.Interfaces;
+using DinaCSharp.Extensions;
 using DinaCSharp.Graphics;
-using DinaCSharp.Interfaces;
 using DinaCSharp.Services;
 
 using Microsoft.Xna.Framework;
@@ -14,80 +14,208 @@ using System.Collections.Generic;
 namespace DinaCSharp.Core
 {
     /// <summary>
-    /// Représente un groupe d'éléments, gérant leur affichage, visibilité, couleur et interactions.
+    /// Représente un groupe d'éléments gérant leur affichage, leur visibilité, leur couleur et leurs interactions.
+    /// Les éléments sont automatiquement triés par ordre d'affichage (Z-order) lors de chaque ajout.
     /// </summary>
     public class Group : Base, IDraw, IVisible, IEnumerable<IElement>, ICollide, IUpdate, IColor, IClickable, IHovered, IDisposable
     {
         private readonly List<IElement> _elements = [];
-        private int index;
-        private Rectangle _rect;
-        private bool _visible;
-        private Color _color;
+        private Rectangle  _rect;
+        private bool       _visible;
+        private Color      _color;
         private readonly Texture2D _pixel;
-        private IDrawingElement? _title;
-        private Rectangle? _titleRect;
+        private IDrawingElement?   _title;
+        private Rectangle?         _titleRect;
         private bool _hovered;
         private bool _disposed;
 
+        // ─────────────────────────────────────────────────────────────────────
+        // Constructeurs
+        // ─────────────────────────────────────────────────────────────────────
+
         /// <summary>
-        /// Initialise une nouvelle instance de la classe Group avec les propriétés spécifiées.
+        /// Initialise un groupe vide.
         /// </summary>
-        /// <param name="position">Position initiale du groupe. Par défaut, (0,0).</param>
-        /// <param name="dimensions">Dimensions initiales du groupe. Par défaut, (0,0).</param>
-        /// <param name="zorder">Ordre d'affichage initial du groupe. Par défaut, 0.</param>
-        public Group(Vector2 position = default, Vector2 dimensions = default, int zorder = 0) : base(position, dimensions, zorder)
+        /// <param name="position">Position initiale du groupe. Par défaut, (0, 0).</param>
+        /// <param name="dimensions">Dimensions initiales du groupe. Par défaut, (0, 0).</param>
+        /// <param name="zorder">Ordre d'affichage initial. Par défaut, 0.</param>
+        /// <exception cref="InvalidOperationException">
+        /// Levée si le service <c>Texture1px</c> n'est pas enregistré dans le <see cref="ServiceLocator"/>.
+        /// </exception>
+        public Group(Vector2 position = default, Vector2 dimensions = default, int zorder = 0)
+            : base(position, dimensions, zorder)
         {
-            _color = Color.White;
-            Visible = true;
-            _pixel = ServiceLocator.Get<Texture2D>(ServiceKeys.Texture1px)
+            _color   = Color.White;
+            Visible  = true;
+            _pixel   = ServiceLocator.Get<Texture2D>(DinaServiceKeys.Texture1px)
                 ?? throw new InvalidOperationException("Le service Texture1px n'est pas disponible.");
         }
+
         /// <summary>
-        /// Initialise une nouvelle instance de la classe Group en copiant les éléments d'un autre groupe.
+        /// Initialise un groupe en copiant les éléments d'un groupe source.
         /// </summary>
-        /// <param name="group">Groupe source à copier.</param>
+        /// <param name="source">Groupe source à copier.</param>
         /// <param name="duplicate">
-        /// Indique si les éléments doivent être dupliqués. 
-        /// Si false, les éléments sont simplement référencés.
+        /// Si <c>true</c>, chaque élément est dupliqué via son constructeur de copie.
+        /// Si <c>false</c>, les références sont partagées entre les deux groupes.
         /// </param>
-        /// <exception cref="ArgumentNullException">Lance une exception si le groupe fourni est null.</exception>
-        public Group(Group group, bool duplicate = true)
+        /// <exception cref="ArgumentNullException">Levée si <paramref name="source"/> est <c>null</c>.</exception>
+        /// <exception cref="InvalidOperationException">
+        /// Levée si un élément ne possède pas de constructeur de copie, ou si le service <c>Texture1px</c>
+        /// n'est pas enregistré dans le <see cref="ServiceLocator"/>.
+        /// </exception>
+        public Group(Group source, bool duplicate = true)
         {
-            ArgumentNullException.ThrowIfNull(group);
-            _pixel = ServiceLocator.Get<Texture2D>(ServiceKeys.Texture1px)
+            ArgumentNullException.ThrowIfNull(source);
+
+            _pixel = ServiceLocator.Get<Texture2D>(DinaServiceKeys.Texture1px)
                 ?? throw new InvalidOperationException("Le service Texture1px n'est pas disponible.");
 
             _elements = [];
-            foreach (var item in group._elements)
+            foreach (var item in source._elements)
             {
                 if (duplicate)
                 {
                     IElement element = (IElement?)Activator.CreateInstance(item.GetType(), item)
-                        ?? throw new InvalidOperationException($"Impossible de dupliquer l'élément de type {item.GetType().Name}.");
+                        ?? throw new InvalidOperationException(
+                            $"Impossible de dupliquer l'élément de type {item.GetType().Name}. " +
+                            $"Vérifiez qu'il possède un constructeur de copie public.");
                     _elements.Add(element);
                 }
                 else
+                {
                     _elements.Add(item);
+                }
             }
-            Position = group.Position;
-            Dimensions = group.Dimensions;
-            ZOrder = group.ZOrder;
-            Visible = group.Visible;
-            index = 0;
-            _color = Color.White;
+
+            Position   = source.Position;
+            Dimensions = source.Dimensions;
+            ZOrder     = source.ZOrder;
+            Visible    = source.Visible;
+            _color     = Color.White;
         }
 
+        // ─────────────────────────────────────────────────────────────────────
+        // Propriétés publiques
+        // ─────────────────────────────────────────────────────────────────────
+
         /// <summary>
-        /// Obtient l'élément actuel lors de l'énumération du groupe.
-        /// </summary>
-        public object Current => _elements[index];
-        /// <summary>
-        /// Obtient le rectangle représentant la position et les dimensions du groupe.
+        /// Rectangle représentant la position et les dimensions du groupe dans l'espace 2D.
+        /// Mis à jour automatiquement lors des changements de <see cref="Position"/> et <see cref="Dimensions"/>.
         /// </summary>
         public Rectangle Rectangle => _rect;
 
         /// <summary>
+        /// Nombre d'éléments dans le groupe.
+        /// </summary>
+        public int Count => _elements.Count;
+
+        /// <summary>
+        /// Obtient ou définit la position du groupe.
+        /// Déplacer le groupe déplace également tous ses éléments et son titre.
+        /// </summary>
+        public override Vector2 Position
+        {
+            get => base.Position;
+            set
+            {
+                Vector2 offset = value - base.Position;
+
+                foreach (var element in _elements)
+                {
+                    if (element is IPosition item)
+                        item.Position += offset;
+                }
+
+                if (_title != null)
+                    _title.Position += offset;
+
+                base.Position  = value;
+                _rect.Location = new Point(Convert.ToInt32(value.X), Convert.ToInt32(value.Y));
+            }
+        }
+
+        /// <summary>
+        /// Obtient ou définit les dimensions du groupe.
+        /// </summary>
+        public override Vector2 Dimensions
+        {
+            get => base.Dimensions;
+            set
+            {
+                base.Dimensions = value;
+                _rect.Size      = new Point(Convert.ToInt32(value.X), Convert.ToInt32(value.Y));
+            }
+        }
+
+        /// <summary>
+        /// Obtient ou définit la visibilité du groupe.
+        /// Propager la valeur à tous les éléments implémentant <see cref="IVisible"/>.
+        /// </summary>
+        public bool Visible
+        {
+            get => _visible;
+            set
+            {
+                foreach (var element in _elements)
+                {
+                    if (element is IVisible visible)
+                        visible.Visible = value;
+                }
+                _visible = value;
+            }
+        }
+
+        /// <summary>
+        /// Obtient ou définit la couleur du groupe.
+        /// Propage la valeur à tous les éléments implémentant <see cref="IColor"/>.
+        /// </summary>
+        public Color Color
+        {
+            get => _color;
+            set
+            {
+                foreach (var element in _elements)
+                {
+                    if (element is IColor colored)
+                        colored.Color = value;
+                }
+                _color = value;
+            }
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Propriétés du cadre
+        // ─────────────────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Active ou désactive l'affichage d'un cadre autour du groupe.
+        /// </summary>
+        public bool HasFrame { get; set; }
+
+        /// <summary>
+        /// Couleur du cadre affiché lorsque <see cref="HasFrame"/> est activé.
+        /// </summary>
+        public Color FrameColor { get; set; } = new Color(50, 50, 50, 200);
+
+        /// <summary>
+        /// Épaisseur du trait du cadre en pixels.
+        /// </summary>
+        public int FrameThickness { get; set; } = 2;
+
+        /// <summary>
+        /// Espacement en pixels entre les éléments du groupe et le cadre.
+        /// </summary>
+        public int FramePadding { get; set; } = 8;
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Gestion des éléments
+        // ─────────────────────────────────────────────────────────────────────
+
+        /// <summary>
         /// Ajoute un élément au groupe.
+        /// Si l'élément implémente <see cref="IDimensions"/>, les dimensions du groupe sont recalculées.
+        /// Les éléments sont ensuite triés par Z-order.
         /// </summary>
         /// <param name="element">Élément à ajouter.</param>
         public void Add(IElement element)
@@ -99,264 +227,199 @@ namespace DinaCSharp.Core
         }
 
         /// <summary>
-        /// Obtient ou définit la position du groupe. La modification de la position déplace également ses éléments.
+        /// Trie les éléments du groupe par ordre d'affichage (Z-order) croissant.
         /// </summary>
-        public override Vector2 Position
+        public void SortElements()
         {
-            get => base.Position;
-            set
-            {
-                Vector2 offset = value - base.Position;
-                foreach (var element in _elements)
-                {
-                    if (element is IPosition item)
-                        item.Position += offset;
-                }
-                if (_title != null)
-                    _title.Position += offset;
-
-                base.Position = value;
-                _rect.Location = new Point(Convert.ToInt32(value.X), Convert.ToInt32(value.Y));
-            }
-        }
-        /// <summary>
-        /// Obtient ou définit les dimensions du groupe.
-        /// </summary>
-        public override Vector2 Dimensions
-        {
-            get => base.Dimensions;
-            set
-            {
-                base.Dimensions = value;
-                _rect.Size = new Point(Convert.ToInt32(value.X), Convert.ToInt32(value.Y));
-            }
-        }
-        /// <summary>
-        /// Obtient ou définit la visibilité du groupe et de ses éléments.
-        /// </summary>
-        public bool Visible
-        {
-            get => _visible;
-            set
-            {
-                foreach (var element in _elements)
-                {
-                    if (element is IVisible elemvisible)
-                        elemvisible.Visible = value;
-                }
-                _visible = value;
-            }
+            _elements.Sort((e1, e2) => e1.ZOrder.CompareTo(e2.ZOrder));
         }
 
-        /// <summary>
-        /// Obtient ou définit la couleur du groupe et de ses éléments.
-        /// </summary>
-        public Color Color
-        {
-            get => _color;
-            set
-            {
-                foreach (var element in _elements)
-                {
-                    if (element is IColor elemcolor)
-                        elemcolor.Color = value;
-                }
-                _color = value;
-            }
-        }
+        // ─────────────────────────────────────────────────────────────────────
+        // Interactions
+        // ─────────────────────────────────────────────────────────────────────
 
         /// <summary>
-        /// Vérifie si un élément du groupe est cliqué.
+        /// Vérifie si au moins un élément du groupe a été cliqué (clic gauche ou droit).
         /// </summary>
-        /// <returns>True si un élément est cliqué, sinon false.</returns>
+        /// <returns><c>true</c> si au moins un élément cliquable est cliqué, <c>false</c> sinon.</returns>
         public bool IsClicked()
         {
             foreach (var item in _elements)
             {
-                if (item is IClickable itemclickable)
-                    return itemclickable.IsClicked();
+                if (item is IClickable clickable && clickable.IsClicked())
+                    return true;
             }
             return false;
         }
+
         /// <summary>
-        /// Vérifie si un élément du groupe est cliqué avec le clic gauche de la souris.
+        /// Vérifie si au moins un élément du groupe a été cliqué avec le bouton gauche de la souris.
         /// </summary>
-        /// <returns>True si un élément est cliqué avec le clic gauche de la souris, sinon false.</returns>
+        /// <returns><c>true</c> si au moins un élément cliquable est cliqué avec le bouton gauche, <c>false</c> sinon.</returns>
         public bool IsLeftClicked()
         {
             foreach (var item in _elements)
             {
-                if (item is IClickable itemclickable)
-                    return itemclickable.IsLeftClicked();
+                if (item is IClickable clickable && clickable.IsLeftClicked())
+                    return true;
             }
             return false;
         }
+
         /// <summary>
-        /// Vérifie si un élément du groupe est cliqué avec le clic droit de la souris.
+        /// Vérifie si au moins un élément du groupe a été cliqué avec le bouton droit de la souris.
         /// </summary>
-        /// <returns>True si un élément est cliqué avec le clic droit de la souris, sinon false.</returns>
+        /// <returns><c>true</c> si au moins un élément cliquable est cliqué avec le bouton droit, <c>false</c> sinon.</returns>
         public bool IsRightClicked()
         {
             foreach (var item in _elements)
             {
-                if (item is IClickable itemclickable)
-                    return itemclickable.IsRightClicked();
+                if (item is IClickable clickable && clickable.IsRightClicked())
+                    return true;
             }
             return false;
         }
-        /// <summary>
-        /// Vérifie si un élément du groupe est cliqué.
-        /// </summary>
-        /// <returns>True si un élément est cliqué, sinon false.</returns>
-        public bool IsHovered() => _hovered;
-        /// <summary>
-        /// Obtient le nombre d'éléments dans le groupe.
-        /// </summary>
-        /// <returns>Nombre d'éléments.</returns>
-        public int Count() => _elements.Count;
-        /// <summary>
-        /// Passe à l'élément suivant lors de l'énumération.
-        /// </summary>
-        /// <returns>True si un élément suivant existe, sinon false.</returns>
-        public bool MoveNext()
-        {
-            return (++index < _elements.Count);
-        }
-        /// <summary>
-        /// Réinitialise l'énumération du groupe.
-        /// </summary>
-        public void Reset() => index = -1;
-        /// <summary>
-        /// Retourne un énumérateur pour parcourir les éléments du groupe.
-        /// </summary>
-        public IEnumerator<IElement> GetEnumerator() => _elements.GetEnumerator();
 
-        // Implémentation non générique obligatoire par IEnumerable
-        IEnumerator IEnumerable.GetEnumerator() => _elements.GetEnumerator();
+        /// <summary>
+        /// Indique si la souris survole actuellement la zone du groupe.
+        /// Mis à jour à chaque appel à <see cref="Update"/>.
+        /// </summary>
+        /// <returns><c>true</c> si la souris est dans les limites du groupe, <c>false</c> sinon.</returns>
+        public bool IsHovered() => _hovered;
+
+        /// <summary>
+        /// Simule un clic gauche sur le groupe et le propage à tous les éléments implémentant <see cref="IClickable"/>.
+        /// </summary>
+        public void LeftClick()
+        {
+            foreach (var elem in _elements)
+            {
+                if (elem is IClickable clickable)
+                    clickable.LeftClick();
+            }
+        }
+
+        /// <summary>
+        /// Simule un clic droit sur le groupe et le propage à tous les éléments implémentant <see cref="IClickable"/>.
+        /// </summary>
+        public void RightClick()
+        {
+            foreach (var elem in _elements)
+            {
+                if (elem is IClickable clickable)
+                    clickable.RightClick();
+            }
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Collision
+        // ─────────────────────────────────────────────────────────────────────
 
         /// <summary>
         /// Vérifie si le groupe entre en collision avec un autre élément.
         /// </summary>
         /// <param name="item">Élément à tester pour la collision.</param>
-        /// <returns>True si une collision est détectée, sinon false.</returns>
+        /// <returns><c>true</c> si les rectangles se chevauchent, <c>false</c> sinon ou si <paramref name="item"/> est <c>null</c>.</returns>
         public bool Collide(ICollide item)
         {
             if (item == null)
                 return false;
             return Rectangle.Intersects(item.Rectangle);
         }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Titre et cadre
+        // ─────────────────────────────────────────────────────────────────────
+
         /// <summary>
-        /// Active ou désactive l’affichage d’un cadre autour du groupe.
-        /// </summary>
-        public bool HasFrame { get; set; }
-        /// <summary>
-        /// Couleur du cadre ou du fond si <see cref="HasFrame"/> est activé.
-        /// </summary>
-        public Color FrameColor { get; set; } = new Color(50, 50, 50, 200);
-        /// <summary>
-        /// Épaisseur du cadre.
-        /// </summary>
-        public int FrameThickness { get; set; } = 2;
-        /// <summary>
-        /// Espacement supplémentaire appliqué autour des éléments
-        /// lorsque le cadre est dessiné.
-        /// </summary>
-        public int FramePadding { get; set; } = 8;
-        /// <summary>
-        /// Ajoute un titre au groupe.
+        /// Crée et ajoute un titre textuel au groupe, positionné à cheval sur le bord supérieur du cadre.
+        /// Active automatiquement l'affichage du cadre (<see cref="HasFrame"/>).
         /// </summary>
         /// <param name="font">Police du titre.</param>
-        /// <param name="text">Texte du titre.</param>
-        /// 
-        /// <param name="textcolor">Couleur du titre.</param>
-        /// <param name="shadowcolor">Couleur de l'ombre (facultatif).</param>
-        /// <param name="shadowoffset">Décalage de l'ombre (facultatif).</param>
-        /// <param name="framecolor">Couleur du cadre (facultatif).</param>
-        /// <param name="framepadding">Espacement supplémentaire appliqué autour des éléments.</param>
-        /// <param name="framethickness">Épaisseur du cadre.</param>
-        /// <param name="zorder">Ordre de superposition du titre (facultatif).</param>
-        /// <returns>L'élément titre ajouté.</returns>
-        public IDrawingElement AddTitle(SpriteFont font, string text, Color textcolor, Color? framecolor = null, int? framepadding = null, int? framethickness = null, Color? shadowcolor = null, Vector2? shadowoffset = null, int zorder = 0)
+        /// <param name="text">Contenu du titre.</param>
+        /// <param name="textcolor">Couleur du texte du titre.</param>
+        /// <param name="framecolor">Couleur du cadre. Par défaut, gris semi-transparent.</param>
+        /// <param name="framepadding">Espacement entre les éléments et le cadre. Par défaut, 8 px (au minimum la moitié de l'interligne).</param>
+        /// <param name="framethickness">Épaisseur du cadre. Par défaut, 2 px.</param>
+        /// <param name="shadowcolor">Couleur de l'ombre du titre (facultatif). Nécessite <paramref name="shadowoffset"/>.</param>
+        /// <param name="shadowoffset">Décalage de l'ombre du titre (facultatif). Nécessite <paramref name="shadowcolor"/>.</param>
+        /// <param name="zorder">Ordre de superposition du titre. Par défaut, 0.</param>
+        /// <returns>L'élément titre créé.</returns>
+        /// <exception cref="ArgumentNullException">Levée si <paramref name="font"/> est <c>null</c>.</exception>
+        public IDrawingElement AddTitle(SpriteFont font, string text, Color textcolor,
+                                        Color? framecolor = null, int? framepadding = null, int? framethickness = null,
+                                        Color? shadowcolor = null, Vector2? shadowoffset = null, int zorder = 0)
         {
             ArgumentNullException.ThrowIfNull(font, nameof(font));
-            if (_title != null)
-                _title = null;
-            // Ajout du cadre
-            HasFrame = true;
-            FrameColor = framecolor ?? new Color(50, 50, 50, 200);
-            FramePadding = framepadding ?? 8;
+
+            DisposeTitle();
+
+            HasFrame       = true;
+            FrameColor     = framecolor     ?? new Color(50, 50, 50, 200);
+            FramePadding   = framepadding   ?? 8;
+            FrameThickness = framethickness ?? 2;
+
+            // Le padding doit être au moins égal à la moitié de l'interligne pour que le titre ne déborde pas
             if (FramePadding < font.LineSpacing / 2)
                 FramePadding = font.LineSpacing / 2 + 1;
-            FrameThickness = framethickness ?? 2;
 
-            if (shadowcolor.HasValue && shadowoffset.HasValue)
-                _title = new ShadowText(font, text, textcolor, Vector2.Zero, shadowcolor.Value, shadowoffset.Value, zorder: zorder);
-            else
-                _title = new Text(font, text, textcolor, Vector2.Zero, zorder: zorder);
+            _title = (shadowcolor.HasValue && shadowoffset.HasValue)
+                ? new ShadowText(font, text, textcolor, shadowcolor.Value, shadowoffset.Value, zorder: zorder)
+                : new Text(font, text, textcolor, Vector2.Zero, zorder: zorder);
 
-            Rectangle bounds = CalculateBounds();
-            bounds.Inflate(FramePadding, FramePadding);
-
-            // alignement : centré en haut
-            float titleX = bounds.X + FramePadding * 2;
-            float titleY = bounds.Y - _title.Dimensions.Y / 2f;
-
-            _title.Position = new Vector2(titleX, titleY);
-            _titleRect = new Rectangle((int)titleX, (int)titleY, (int)_title.Dimensions.X, (int)_title.Dimensions.Y);
-
+            PositionTitle();
             return _title;
         }
+
         /// <summary>
-        /// Ajoute un titre à partir d'un élément déjà créé.
+        /// Ajoute un élément titre déjà instancié au groupe, positionné à cheval sur le bord supérieur du cadre.
+        /// Active automatiquement l'affichage du cadre (<see cref="HasFrame"/>).
         /// </summary>
-        /// <param name="title">L'élément titre à ajouter.</param>
-        /// <param name="framecolor">Couleur du cadre (facultatif).</param>
-        /// <param name="framepadding">Espacement supplémentaire appliqué autour des éléments.</param>
-        /// <param name="framethickness">Épaisseur du cadre.</param>
-        /// <returns>L'élément titre ajouté.</returns>
-        public IDrawingElement AddTitle(IDrawingElement title, Color? framecolor = null, int? framepadding = null, int? framethickness = null)
+        /// <param name="title">Élément titre à utiliser.</param>
+        /// <param name="framecolor">Couleur du cadre. Par défaut, gris semi-transparent.</param>
+        /// <param name="framepadding">Espacement entre les éléments et le cadre. Par défaut, 8 px.</param>
+        /// <param name="framethickness">Épaisseur du cadre. Par défaut, 2 px.</param>
+        /// <returns>L'élément titre fourni.</returns>
+        /// <exception cref="ArgumentNullException">Levée si <paramref name="title"/> est <c>null</c>.</exception>
+        public IDrawingElement AddTitle(IDrawingElement title,
+                                        Color? framecolor = null, int? framepadding = null, int? framethickness = null)
         {
             ArgumentNullException.ThrowIfNull(title, nameof(title));
-            if (_title != null)
-                _title = null;
-            _title = title;
-            // Ajout du cadre
-            HasFrame = true;
-            FrameColor = framecolor ?? new Color(50, 50, 50, 200);
-            FramePadding = framepadding ?? 8;
+
+            DisposeTitle();
+
+            _title         = title;
+            HasFrame       = true;
+            FrameColor     = framecolor     ?? new Color(50, 50, 50, 200);
+            FramePadding   = framepadding   ?? 8;
             FrameThickness = framethickness ?? 2;
 
-            Rectangle bounds = CalculateBounds();
-            bounds.Inflate(FramePadding, FramePadding);
-
-            // alignement : centré en haut
-            float titleX = bounds.X + (bounds.Width - _title.Dimensions.X) / 2f;
-            float titleY = bounds.Y - _title.Dimensions.Y / 2f;
-
-            _title.Position = new Vector2(titleX, titleY);
-            _titleRect = new Rectangle((int)titleX, (int)titleY, (int)_title.Dimensions.X, (int)_title.Dimensions.Y);
-
+            PositionTitle();
             return _title;
         }
 
         /// <summary>
-        /// Permet d'ajouter un cadre au groupe.
+        /// Active et configure le cadre du groupe sans ajouter de titre.
         /// </summary>
         /// <param name="framecolor">Couleur du cadre.</param>
-        /// <param name="framepadding">Espacement supplémentaire appliqué autour des éléments.</param>
-        /// <param name="framethickness">Épaisseur du cadre.</param>
+        /// <param name="framepadding">Espacement entre les éléments et le cadre en pixels.</param>
+        /// <param name="framethickness">Épaisseur du trait du cadre en pixels.</param>
         public void AddFrame(Color framecolor, int framepadding, int framethickness)
         {
-            HasFrame = true;
-            FrameColor = framecolor;
-            FramePadding = framepadding;
+            HasFrame       = true;
+            FrameColor     = framecolor;
+            FramePadding   = framepadding;
             FrameThickness = framethickness;
         }
 
+        // ─────────────────────────────────────────────────────────────────────
+        // Rendu et mise à jour
+        // ─────────────────────────────────────────────────────────────────────
+
         /// <summary>
-        /// Dessine les éléments du groupe.
+        /// Dessine le cadre, le titre puis tous les éléments visibles du groupe.
         /// </summary>
-        /// <param name="spritebatch">Objet SpriteBatch utilisé pour le rendu.</param>
+        /// <param name="spritebatch">Instance de <see cref="SpriteBatch"/> utilisée pour le rendu.</param>
         public void Draw(SpriteBatch spritebatch)
         {
             if (!Visible)
@@ -370,11 +433,11 @@ namespace DinaCSharp.Core
                 if (_titleRect.HasValue)
                 {
                     var titleRect = _titleRect.Value;
-                    int t = FrameThickness;
+                    int t         = FrameThickness;
 
-                    // cadre avec trou
+                    // Cadre avec interruption en haut pour laisser passer le titre
                     spritebatch.DrawRectangle(_pixel, new Rectangle(bounds.X, bounds.Y, titleRect.Left, t), FrameColor, t);
-                    int rightX = bounds.X + titleRect.Right + titleRect.Left + FramePadding;
+                    int rightX     = bounds.X + titleRect.Right + titleRect.Left + FramePadding;
                     int rightWidth = bounds.Right - rightX;
                     spritebatch.DrawRectangle(_pixel, new Rectangle(rightX, bounds.Y, rightWidth, t), FrameColor, t);
                     spritebatch.DrawRectangle(_pixel, new Rectangle(bounds.X, bounds.Bottom - t, bounds.Width, t), FrameColor, t);
@@ -386,26 +449,46 @@ namespace DinaCSharp.Core
                     spritebatch.DrawRectangle(_pixel, bounds, FrameColor, FrameThickness, isFilled: false);
                 }
             }
-            if (_title is IDraw drawingTitle)
-                drawingTitle.Draw(spritebatch);
+
+            if (_title is IDraw drawableTitle)
+                drawableTitle.Draw(spritebatch);
 
             foreach (var element in _elements)
             {
-                if (element is IDraw draw)
-                    draw.Draw(spritebatch);
+                if (element is IDraw drawable)
+                    drawable.Draw(spritebatch);
             }
         }
+
         /// <summary>
-        /// Calcule le plus petit rectangle aligné sur les axes qui contient complètement tous les éléments du groupe.
+        /// Met à jour l'état du survol et propage la mise à jour à tous les éléments implémentant <see cref="IUpdate"/>.
+        /// </summary>
+        /// <param name="gametime">Temps de jeu courant.</param>
+        public void Update(GameTime gametime)
+        {
+            // _rect est maintenu à jour par les setters de Position et Dimensions
+            _hovered = _rect.Contains(Mouse.GetState().Position);
+
+            foreach (var elem in _elements)
+            {
+                if (elem is IUpdate updatable)
+                    updatable.Update(gametime);
+            }
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Calculs géométriques
+        // ─────────────────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Calcule le plus petit rectangle aligné sur les axes qui englobe tous les éléments du groupe.
         /// </summary>
         /// <remarks>
-        /// Utile pour déterminer l'étendue spatiale globale du groupe, notamment pour la mise en page, 
-        /// la détection de collisions ou le rendu. Le rectangle retourné est le rectangle minimal 
-        /// qui englobe les dimensions de chaque élément présent dans le groupe.
+        /// Utile pour la mise en page, la détection de collisions ou le rendu du cadre.
         /// </remarks>
         /// <returns>
-        /// Un <see cref="Rectangle"/> représentant la zone englobante de tous les éléments. 
-        /// Retourne <see cref="Rectangle.Empty"/> si le groupe ne contient aucun élément.
+        /// Un <see cref="Rectangle"/> englobant tous les éléments,
+        /// ou <see cref="Rectangle.Empty"/> si le groupe est vide.
         /// </returns>
         public Rectangle CalculateBounds()
         {
@@ -417,125 +500,36 @@ namespace DinaCSharp.Core
 
             foreach (var element in _elements)
             {
-                Rectangle bounds = new Rectangle(element.Position.ToPoint(), element.Dimensions.ToPoint());
-                if (bounds.Left < minX)
-                    minX = bounds.Left;
-                if (bounds.Top < minY)
-                    minY = bounds.Top;
-                if (bounds.Right > maxX)
-                    maxX = bounds.Right;
-                if (bounds.Bottom > maxY)
-                    maxY = bounds.Bottom;
+                var bounds = new Rectangle(element.Position.ToPoint(), element.Dimensions.ToPoint());
+                if (bounds.Left   < minX) minX = bounds.Left;
+                if (bounds.Top    < minY) minY = bounds.Top;
+                if (bounds.Right  > maxX) maxX = bounds.Right;
+                if (bounds.Bottom > maxY) maxY = bounds.Bottom;
             }
 
             return new Rectangle(minX, minY, maxX - minX, maxY - minY);
         }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // IEnumerable<IElement>
+        // ─────────────────────────────────────────────────────────────────────
+
         /// <summary>
-        /// Trie les éléments du groupe par ordre d'affichage (Z-order).
+        /// Retourne un énumérateur pour parcourir les éléments du groupe.
         /// </summary>
-        public void SortElements()
-        {
-            _elements.Sort(delegate (IElement e1, IElement e2)
-            {
-                if (e1.ZOrder < e2.ZOrder)
-                    return -1;
-                if (e1.ZOrder > e2.ZOrder)
-                    return 1;
-                return 0;
-            });
-        }
+        public IEnumerator<IElement> GetEnumerator() => _elements.GetEnumerator();
+
         /// <summary>
-        /// Met à jour les dimensions du groupe en fonction de ses éléments.
+        /// Implémentation non générique de <see cref="IEnumerable"/>, requise par l'interface.
         /// </summary>
-        private void UpdateDimensions()
-        {
-            float x, y;
-            float w, h;
-            x = Position.X;
-            y = Position.Y;
-            w = -1;
-            h = -1;
-            foreach (var element in _elements)
-            {
-                if (element is IDimensions elemdim && element is IPosition elempos)
-                {
-                    Vector2 elemPos = elempos.Position;
-                    Vector2 elemDim = elemdim.Dimensions;
+        IEnumerator IEnumerable.GetEnumerator() => _elements.GetEnumerator();
 
-                    if (elemPos.X < x)
-                        x = elemPos.X;
-                    if (elemPos.Y < y)
-                        y = elemPos.Y;
-                    Vector2 flip = Vector2.One;
-                    if (element is IFlip eflip)
-                    {
-                        // TODO: à corriger dès que la classe Image sera implémentée
-                        //flip = eflip.GetFlip();
-                    }
-                    float cfvx = flip.X > 0 ? 1 : 0;
-                    float cfvy = flip.Y > 0 ? 1 : 0;
-                    if (w < elemPos.X + elemDim.X * cfvx)
-                        w = elemPos.X + elemDim.X * cfvx;
-                    if (h < elemPos.Y + elemDim.Y * cfvy)
-                        h = elemPos.Y + elemDim.Y * cfvy;
-                    //if (w < Math.Abs(elemPos.X) + Math.Abs(elemDim.X * cfvx))
-                    //    w = Math.Abs(elemPos.X) + Math.Abs(elemDim.X * cfvx);
-                    //if (h < Math.Abs(elemPos.Y) + Math.Abs(elemDim.Y * cfvy))
-                    //    h = Math.Abs(elemPos.Y) + Math.Abs(elemDim.Y * cfvy);
-                }
-            } //foreach
-            if (x < float.MaxValue && y < float.MaxValue && w > -1 && h > -1)
-            {
-                Dimensions = new Vector2(w - (x < 0 ? 0 : x), h - (y < 0 ? 0 : y));
-            }
-
-        }
-        /// <summary>
-        /// Met à jour les éléments du groupe.
-        /// </summary>
-        /// <param name="gametime">Temps de jeu actuel.</param>
-        public void Update(GameTime gametime)
-        {
-            MouseState ms = Mouse.GetState();
-            Rectangle groupRect = new Rectangle((int)Position.X, (int)Position.Y, (int)Dimensions.X, (int)Dimensions.Y);
-            if (groupRect.Contains(ms.Position))
-                _hovered = true;
-            else
-                _hovered = false;
-
-            foreach (var elem in _elements)
-            {
-                if (elem is IUpdate uelem)
-                    uelem.Update(gametime);
-            }
-        }
+        // ─────────────────────────────────────────────────────────────────────
+        // IDisposable
+        // ─────────────────────────────────────────────────────────────────────
 
         /// <summary>
-        /// Simule un clic gauche sur le Group et le transmet à tous les éléments qu'il contient.
-        /// </summary>
-        public void LeftClick()
-        {
-            foreach (var elem in _elements)
-            {
-                if (elem is IClickable celem)
-                    celem.LeftClick();
-            }
-        }
-
-        /// <summary>
-        /// Simule un clic droit sur le Group et le transmet à tous les éléments qu'il contient
-        /// </summary>
-        public void RightClick()
-        {
-            foreach (var elem in _elements)
-            {
-                if (elem is IClickable celem)
-                    celem.RightClick();
-            }
-        }
-
-        /// <summary>
-        /// Libère les ressources utilisées par le groupe et désabonne tous les événements.
+        /// Libère les ressources du groupe et de tous ses éléments.
         /// </summary>
         public void Dispose()
         {
@@ -544,7 +538,7 @@ namespace DinaCSharp.Core
         }
 
         /// <summary>
-        /// Libère les ressources managées et non managées.
+        /// Libère les ressources managées : dispose chaque élément et vide la collection.
         /// </summary>
         protected virtual void Dispose(bool disposing)
         {
@@ -553,6 +547,8 @@ namespace DinaCSharp.Core
 
             if (disposing)
             {
+                DisposeTitle();
+
                 foreach (var element in _elements)
                 {
                     if (element is IDisposable disposable)
@@ -560,7 +556,79 @@ namespace DinaCSharp.Core
                 }
                 _elements.Clear();
             }
+
             _disposed = true;
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Méthodes privées
+        // ─────────────────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Recalcule les dimensions du groupe pour englober l'ensemble de ses éléments.
+        /// Appelé automatiquement lors de l'ajout d'un élément implémentant <see cref="IDimensions"/>.
+        /// </summary>
+        private void UpdateDimensions()
+        {
+            float x = Position.X;
+            float y = Position.Y;
+            float w = -1;
+            float h = -1;
+
+            foreach (var element in _elements)
+            {
+                if (element is not IDimensions elemdim || element is not IPosition elempos)
+                    continue;
+
+                Vector2 elemPos = elempos.Position;
+                Vector2 elemDim = elemdim.Dimensions;
+
+                if (elemPos.X < x) x = elemPos.X;
+                if (elemPos.Y < y) y = elemPos.Y;
+
+                // TODO: à activer dès que IFlip sera implémenté sur la classe Image
+                // Vector2 flip = element is IFlip eflip ? eflip.GetFlip() : Vector2.One;
+                // float cfvx = flip.X > 0 ? 1 : 0;
+                // float cfvy = flip.Y > 0 ? 1 : 0;
+                const float cfvx = 1f;
+                const float cfvy = 1f;
+
+                if (w < elemPos.X + elemDim.X * cfvx) w = elemPos.X + elemDim.X * cfvx;
+                if (h < elemPos.Y + elemDim.Y * cfvy) h = elemPos.Y + elemDim.Y * cfvy;
+            }
+
+            if (w > -1 && h > -1)
+                Dimensions = new Vector2(w - (x < 0 ? 0 : x), h - (y < 0 ? 0 : y));
+        }
+
+        /// <summary>
+        /// Positionne le titre à cheval sur le bord supérieur du cadre et met à jour <see cref="_titleRect"/>.
+        /// </summary>
+        private void PositionTitle()
+        {
+            if (_title == null)
+                return;
+
+            Rectangle bounds = CalculateBounds();
+            bounds.Inflate(FramePadding, FramePadding);
+
+            float titleX = bounds.X + (bounds.Width - _title.Dimensions.X) / 2f;
+            float titleY = bounds.Y - _title.Dimensions.Y / 2f;
+
+            _title.Position = new Vector2(titleX, titleY);
+            _titleRect      = new Rectangle((int)titleX, (int)titleY,
+                                             (int)_title.Dimensions.X, (int)_title.Dimensions.Y);
+        }
+
+        /// <summary>
+        /// Libère le titre courant s'il implémente <see cref="IDisposable"/>, puis le supprime.
+        /// </summary>
+        private void DisposeTitle()
+        {
+            if (_title is IDisposable disposable)
+                disposable.Dispose();
+            _title     = null;
+            _titleRect = null;
         }
     }
 }

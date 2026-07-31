@@ -1,5 +1,7 @@
 ﻿#pragma warning disable CS1591 // Pour ne pas avoir de warning sur chaque valeur des enums.
+#pragma warning disable IDE0130 // Le namespace ne correspond pas à la structure de dossiers
 namespace DinaCSharp.Enums
+#pragma warning restore IDE0130 // Le namespace ne correspond pas à la structure de dossiers
 {
     /// <summary>
     /// Définit les alignements horizontaux possibles pour les éléments de l'interface utilisateur.

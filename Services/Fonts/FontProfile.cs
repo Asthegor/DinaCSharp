@@ -1,4 +1,4 @@
-﻿using DinaCSharp.Interfaces;
+﻿using DinaCSharp.Core.Interfaces;
 
 using Microsoft.Xna.Framework;
 
@@ -48,7 +48,7 @@ namespace DinaCSharp.Services.Fonts
             if (_instance != null)
                 throw new InvalidOperationException("FontProfile est déjà initialisé.");
             _instance = new FontProfile(infos, defaultResolution);
-            _instance.Register(ServiceKeys.FontProfile);
+            _instance.Register(DinaServiceKeys.FontProfile);
         }
         public void Register(Key<ServiceTag> key)
         {
