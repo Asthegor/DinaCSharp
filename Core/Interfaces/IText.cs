@@ -11,7 +11,7 @@ namespace DinaCSharp.Core.Interfaces
     /// <remarks>Implementations of this interface allow querying the rendered size of text and adjusting its
     /// alignment within a layout. This interface extends both IPosition and IDimensions, ensuring that position and
     /// size information is available alongside text-specific features.</remarks>
-    public interface IText : IPosition, IDimensions
+    public interface IText : IPosition, IDimensions, IColor, IDraw
     {
         /// <summary>
         /// Gets the width and height, in device-independent units, of the rendered text content.
