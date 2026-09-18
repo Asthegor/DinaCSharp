@@ -1,0 +1,38 @@
+name: Release DinaCSharp
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout (full history for MinVer)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Build
+        run: dotnet build DinaCSharp.csproj -c Release
+
+      - name: Create release and upload assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ github.ref_name }}" `
+            "bin\Release\net10.0\DinaCSharp.dll" `
+            "bin\Release\net10.0\DinaCSharp.deps.json" `
+            "bin\Release\net10.0\DinaCSharp.xml" `
+            "bin\Release\net10.0\DLACrypto.dll" `
+            --title "${{ github.ref_name }}" `
+            --generate-notes
