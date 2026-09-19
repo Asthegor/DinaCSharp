@@ -12,7 +12,7 @@ namespace DinaCSharp.Utils
         private const int REF_WIDTH = 1920;
         private const int REF_HEIGHT = 1080;
 
-        private static float _scale;
+        private static float _scale = 1f;
 
         /// <summary>
         /// Met à jour le facteur de scale en fonction des dimensions de l'écran.
