@@ -2,6 +2,7 @@ using DinaCSharp.Core;
 using DinaCSharp.Core.Interfaces;
 using DinaCSharp.Enums;
 using DinaCSharp.Events;
+using DinaCSharp.Extensions;
 using DinaCSharp.Services.Localization;
 
 using Microsoft.Xna.Framework;
@@ -226,7 +227,7 @@ namespace DinaCSharp.Graphics
 
             if (Wrap)
             {
-                spritebatch.DrawString(_font, _wrappedContent, _displayposition, _color);
+                spritebatch.DrawString(_font, _wrappedContent, _displayposition, _color.PreMultiply());
             }
             else
             {
@@ -235,7 +236,7 @@ namespace DinaCSharp.Graphics
                     ? 0.5f + (ZOrder / MAX_ZORDER)
                     : ZOrder / MIN_ZORDER;
 
-                spritebatch.DrawString(_font, _cachedTranslation, _displayposition, _color,
+                spritebatch.DrawString(_font, _cachedTranslation, _displayposition, _color.PreMultiply(),
                                        _rotation, _origin, 1f, _effects, zorder);
             }
         }
@@ -264,14 +265,13 @@ namespace DinaCSharp.Graphics
                 _displayposition = _displayposition,
                 // Assignation directe du champ pour éviter que le setter de Visible
                 // ne réinitialise les accumulateurs via Timer.Reset().
-                _visible   = _visible,
-                Wrap       = Wrap,
-                Rotation   = _rotation,
+                _visible = _visible,
+                Wrap = Wrap,
+                Rotation = _rotation,
                 Dimensions = Dimensions,
+                // Copie complète de l'état du timer (struct → copie par valeur)
+                Timer = Timer
             };
-
-            // Copie complète de l'état du timer (struct → copie par valeur)
-            copy.Timer = Timer;
 
             return copy;
         }

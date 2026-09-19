@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
+using DinaCSharp.Services.Keys;
 
 namespace DinaCSharp.Graphics
 {
@@ -255,10 +256,18 @@ namespace DinaCSharp.Graphics
         public void SetImage(Texture2D image)
         {
             ArgumentNullException.ThrowIfNull(image, nameof(image));
-            if(_images.Count == 0)
+            if (_images.Count == 0)
+            {
                 _images.Add(image);
+                _positions.Add(Position);
+            }
             else
+            {
                 _images[0] = image;
+                _positions[0] = Position;
+            }
+            if (Dimensions == default(Vector2))
+                Dimensions = new Vector2(image.Width, image.Height);
         }
         /// <summary>
         /// Redéfinit les images du panneau.
@@ -323,22 +332,22 @@ namespace DinaCSharp.Graphics
                                 // Dessiner la bordure (rectangle extérieur avec coins arrondis)
                                 int borderRadius = _radiusCorner + _thickness / 2;
                                 Rectangle borderRect1 = new Rectangle(new Point((int)pos.X - _thickness + borderRadius, pos.Y - _thickness), new Point(dim.X + _thickness * 2 - borderRadius * 2, dim.Y + _thickness * 2));
-                                spritebatch.Draw(texture, borderRect1, BorderColor);
+                                spritebatch.Draw(texture, borderRect1, BorderColor.PreMultiply());
                                 Rectangle borderRect2 = new Rectangle(new Point((int)pos.X - _thickness, pos.Y - _thickness + borderRadius), new Point(dim.X + _thickness * 2, dim.Y + _thickness * 2 - borderRadius * 2));
-                                spritebatch.Draw(texture, borderRect2, BorderColor);
+                                spritebatch.Draw(texture, borderRect2, BorderColor.PreMultiply());
                                 spritebatch.MaskCorners(new Vector2(pos.X - _thickness, pos.Y - _thickness), new Vector2(dim.X + _thickness * 2, dim.Y + _thickness * 2), borderRadius, BorderColor);
                             }
 
                             // Dessiner le fond (rectangle intérieur avec coins arrondis)
                             Rectangle rect1 = new Rectangle(new Point((int)pos.X + _radiusCorner, pos.Y), new Point(dim.X - _radiusCorner * 2, dim.Y));
-                            spritebatch.Draw(texture, rect1, BackgroundColor);
+                            spritebatch.Draw(texture, rect1, BackgroundColor.PreMultiply());
                             Rectangle rect2 = new Rectangle(new Point((int)pos.X, pos.Y + _radiusCorner), new Point(dim.X, dim.Y - _radiusCorner * 2));
-                            spritebatch.Draw(texture, rect2, BackgroundColor);
-                            spritebatch.MaskCorners(Position, Dimensions, _radiusCorner, BackgroundColor);
+                            spritebatch.Draw(texture, rect2, BackgroundColor.PreMultiply());
+                            spritebatch.MaskCorners(Position, Dimensions, _radiusCorner, BackgroundColor.PreMultiply());
                         }
                         else
                         {
-                            spritebatch.Draw(texture, _rectangleBackground, BackgroundColor);
+                            spritebatch.Draw(texture, _rectangleBackground, BackgroundColor.PreMultiply());
                             if (_thickness > 0 && BorderColor != BackgroundColor)
                                 spritebatch.DrawRectangle(texture, _rectangleBorder, BorderColor, _thickness);
                         }
@@ -352,7 +361,7 @@ namespace DinaCSharp.Graphics
                             spritebatch.Draw(_images[0],
                                              new Rectangle(Convert.ToInt32(_positions[0].X), Convert.ToInt32(_positions[0].Y), Convert.ToInt32(Dimensions.X), Convert.ToInt32(Dimensions.Y)),
                                              new Rectangle(0, 0, _images[0].Width, _images[0].Height),
-                                             BackgroundColor);
+                                             BackgroundColor.PreMultiply());
                         }
                         else
                         {
@@ -366,33 +375,33 @@ namespace DinaCSharp.Graphics
                             //int t = _thickness;
 
                             //// Top Left
-                            //spritebatch.Draw(img, new Rectangle(x, y, t, t), new Rectangle(0, 0, t, t), BackgroundColor);
+                            //spritebatch.Draw(img, new Rectangle(x, y, t, t), new Rectangle(0, 0, t, t), BackgroundColor.PreMultiply());
 
                             //// Top
-                            //spritebatch.Draw(img, new Rectangle(x + t, y, w - 2 * t, t), new Rectangle(t, 0, iw - 2 * t, t), BackgroundColor);
+                            //spritebatch.Draw(img, new Rectangle(x + t, y, w - 2 * t, t), new Rectangle(t, 0, iw - 2 * t, t), BackgroundColor.PreMultiply());
 
                             //// Top Right
-                            //spritebatch.Draw(img, new Rectangle(x + w - t, y, t, t), new Rectangle(iw - t, 0, t, t), BackgroundColor);
+                            //spritebatch.Draw(img, new Rectangle(x + w - t, y, t, t), new Rectangle(iw - t, 0, t, t), BackgroundColor.PreMultiply());
 
                             //// Right
-                            //spritebatch.Draw(img, new Rectangle(x + w - t, y + t, t, h - 2 * t), new Rectangle(iw - t, t, t, ih - 2 * t), BackgroundColor);
+                            //spritebatch.Draw(img, new Rectangle(x + w - t, y + t, t, h - 2 * t), new Rectangle(iw - t, t, t, ih - 2 * t), BackgroundColor.PreMultiply());
 
                             //// Bottom Right
-                            //spritebatch.Draw(img, new Rectangle(x + w - t, y + h - t, t, t), new Rectangle(iw - t, ih - t, t, t), BackgroundColor);
+                            //spritebatch.Draw(img, new Rectangle(x + w - t, y + h - t, t, t), new Rectangle(iw - t, ih - t, t, t), BackgroundColor.PreMultiply());
 
                             //// Bottom
-                            //spritebatch.Draw(img, new Rectangle(x + t, y + h - t, w - 2 * t, t), new Rectangle(t, ih - t, iw - 2 * t, t), BackgroundColor);
+                            //spritebatch.Draw(img, new Rectangle(x + t, y + h - t, w - 2 * t, t), new Rectangle(t, ih - t, iw - 2 * t, t), BackgroundColor.PreMultiply());
 
                             //// Bottom Left
-                            //spritebatch.Draw(img, new Rectangle(x, y + h - t, t, t), new Rectangle(0, ih - t, t, t), BackgroundColor);
+                            //spritebatch.Draw(img, new Rectangle(x, y + h - t, t, t), new Rectangle(0, ih - t, t, t), BackgroundColor.PreMultiply());
 
                             //// Left
-                            //spritebatch.Draw(img, new Rectangle(x, y + t, t, h - 2 * t), new Rectangle(0, t, t, ih - 2 * t), BackgroundColor);
+                            //spritebatch.Draw(img, new Rectangle(x, y + t, t, h - 2 * t), new Rectangle(0, t, t, ih - 2 * t), BackgroundColor.PreMultiply());
 
                             //// Center
-                            //spritebatch.Draw(img, new Rectangle(x + t, y + t, w - 2 * t, h - 2 * t), new Rectangle(t, t, iw - 2 * t, ih - 2 * t), BackgroundColor);
+                            //spritebatch.Draw(img, new Rectangle(x + t, y + t, w - 2 * t, h - 2 * t), new Rectangle(t, t, iw - 2 * t, ih - 2 * t), BackgroundColor.PreMultiply());
 
-                            spritebatch.Draw(img, new Rectangle(Position.ToPoint(), Dimensions.ToPoint()), BackgroundColor);
+                            spritebatch.Draw(img, new Rectangle(Position.ToPoint(), Dimensions.ToPoint()), BackgroundColor.PreMultiply());
 
                             Texture2D? texture = ServiceLocator.Get<Texture2D>(DinaServiceKeys.Texture1px)
                                 ?? throw new InvalidOperationException("Texture1px non enregistrée dans le ServiceLocator");
@@ -403,7 +412,7 @@ namespace DinaCSharp.Graphics
                     case 9:
                     {
                         // Corner Top Left
-                        spritebatch.Draw(_images[0], _positions[0], BackgroundColor);
+                        spritebatch.Draw(_images[0], _positions[0], BackgroundColor.PreMultiply());
                         // Top
                         spritebatch.Draw(_images[1],
                                          new Rectangle(Convert.ToInt32(_positions[1].X),
@@ -411,9 +420,9 @@ namespace DinaCSharp.Graphics
                                                        Convert.ToInt32(Dimensions.X - _images[0].Width - _images[2].Width),
                                                        _images[1].Height),
                                          new Rectangle(0, 0, _images[1].Width, _images[1].Height),
-                                         BackgroundColor);
+                                         BackgroundColor.PreMultiply());
                         // Corner Top Right
-                        spritebatch.Draw(_images[2], _positions[2], BackgroundColor);
+                        spritebatch.Draw(_images[2], _positions[2], BackgroundColor.PreMultiply());
                         // Right
                         spritebatch.Draw(_images[3],
                                          new Rectangle(Convert.ToInt32(_positions[3].X),
@@ -421,9 +430,9 @@ namespace DinaCSharp.Graphics
                                                        Convert.ToInt32(_images[3].Width),
                                                        Convert.ToInt32(Dimensions.Y - _images[2].Height - _images[4].Height)),
                                          new Rectangle(0, 0, _images[3].Width, _images[3].Height),
-                                         BackgroundColor);
+                                         BackgroundColor.PreMultiply());
                         // Corner Bottom Right
-                        spritebatch.Draw(_images[4], _positions[4], BackgroundColor);
+                        spritebatch.Draw(_images[4], _positions[4], BackgroundColor.PreMultiply());
                         // Bottom
                         spritebatch.Draw(_images[5],
                                          new Rectangle(Convert.ToInt32(_positions[5].X),
@@ -431,9 +440,9 @@ namespace DinaCSharp.Graphics
                                                        Convert.ToInt32(Dimensions.X - _images[4].Width - _images[6].Width),
                                                        _images[5].Height),
                                          new Rectangle(0, 0, _images[5].Width, _images[5].Height),
-                                         BackgroundColor);
+                                         BackgroundColor.PreMultiply());
                         // Corner Bottom Left
-                        spritebatch.Draw(_images[6], _positions[6], BackgroundColor);
+                        spritebatch.Draw(_images[6], _positions[6], BackgroundColor.PreMultiply());
                         // Left
                         spritebatch.Draw(_images[7],
                                          new Rectangle(Convert.ToInt32(_positions[7].X),
@@ -441,7 +450,7 @@ namespace DinaCSharp.Graphics
                                                        Convert.ToInt32(_images[7].Width),
                                                        Convert.ToInt32(Dimensions.Y - _images[0].Height - _images[6].Height)),
                                          new Rectangle(0, 0, _images[7].Width, _images[7].Height),
-                                         BackgroundColor);
+                                         BackgroundColor.PreMultiply());
                         // Center
                         spritebatch.Draw(_images[8],
                                          new Rectangle(Convert.ToInt32(_positions[8].X),
@@ -449,7 +458,7 @@ namespace DinaCSharp.Graphics
                                                        Convert.ToInt32(Dimensions.X - _images[0].Width - _images[2].Width),
                                                        Convert.ToInt32(Dimensions.Y - _images[0].Height - _images[6].Height)),
                                          new Rectangle(0, 0, _images[8].Width, _images[8].Height),
-                                         BackgroundColor);
+                                         BackgroundColor.PreMultiply());
                         break;
                     }
                     default:
