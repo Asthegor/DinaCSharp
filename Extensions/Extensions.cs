@@ -55,13 +55,13 @@ namespace DinaCSharp.Extensions
             ArgumentNullException.ThrowIfNull(pixel);
 
             if (isFilled)
-                sb.Draw(pixel, rect, color);
+                sb.Draw(pixel, rect, color.PreMultiply());
             else
             {
-                sb.Draw(pixel, new Rectangle(rect.X, rect.Y, rect.Width, thickness), color); // top
-                sb.Draw(pixel, new Rectangle(rect.X, rect.Y, thickness, rect.Height), color); // left
-                sb.Draw(pixel, new Rectangle(rect.Right - thickness, rect.Y, thickness, rect.Height), color); // right
-                sb.Draw(pixel, new Rectangle(rect.X, rect.Bottom - thickness, rect.Width, thickness), color); // bottom
+                sb.Draw(pixel, new Rectangle(rect.X, rect.Y, rect.Width, thickness), color.PreMultiply()); // top
+                sb.Draw(pixel, new Rectangle(rect.X, rect.Y, thickness, rect.Height), color.PreMultiply()); // left
+                sb.Draw(pixel, new Rectangle(rect.Right - thickness, rect.Y, thickness, rect.Height), color.PreMultiply()); // right
+                sb.Draw(pixel, new Rectangle(rect.X, rect.Bottom - thickness, rect.Width, thickness), color.PreMultiply()); // bottom
             }
         }
         /// <summary>
@@ -85,7 +85,7 @@ namespace DinaCSharp.Extensions
             // Calculer l'angle de rotation
             float angle = (float)Math.Atan2(direction.Y, direction.X);
             // Dessiner la ligne
-            sb.Draw(pixel, start, null, color, angle, Vector2.Zero, new Vector2(length, thickness), SpriteEffects.None, 0f);
+            sb.Draw(pixel, start, null, color.PreMultiply(), angle, Vector2.Zero, new Vector2(length, thickness), SpriteEffects.None, 0f);
         }
         /// <summary>
         /// Dessine des masques arrondis sur les quatre coins d’un rectangle
@@ -121,7 +121,7 @@ namespace DinaCSharp.Extensions
                 src.Y = sy;
                 dst.X = dx;
                 dst.Y = dy;
-                sb.Draw(circle, dst, src, color);
+                sb.Draw(circle, dst, src, color.PreMultiply());
             }
         }
         /// <summary>
@@ -200,8 +200,17 @@ namespace DinaCSharp.Extensions
                     }
                 }
             }
-            return [..  modifiedKeys];
+            return [.. modifiedKeys];
         }
+        #endregion
+
+        #region Color
+        /// <summary>
+        /// Pre-multiply the color by its own alpha to match the BlendState.AlphaBlend.
+        /// </summary>
+        /// <param name="color">Color to pre-multiply.</param>
+        /// <returns></returns>
+        public static Color PreMultiply(this Color color) => Color.Multiply(color, (float)color.A / byte.MaxValue);
         #endregion
 
     }

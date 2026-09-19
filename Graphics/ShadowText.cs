@@ -197,11 +197,10 @@ namespace DinaCSharp.Graphics
             {
                 Dimensions = Dimensions,
                 Visible = Visible,
+                // TextTimer est une struct : l'assignation produit une copie profonde de l'état.
+                // On restaure après Visible= pour annuler le Timer.Reset() déclenché par le setter.
+                Timer = Timer
             };
-
-            // TextTimer est une struct : l'assignation produit une copie profonde de l'état.
-            // On restaure après Visible= pour annuler le Timer.Reset() déclenché par le setter.
-            copy.Timer = Timer;
             copy._shadow.Timer = _shadow.Timer;
 
             return copy;

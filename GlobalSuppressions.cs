@@ -6,10 +6,6 @@
 using System.Diagnostics.CodeAnalysis;
 
 [assembly: SuppressMessage( "CodeQuality", "IDE0079:Retirer la suppression inutile",
-    Justification = "La suppression était volontaire pour ignorer un warning dans le code généré / pattern spécifique à Key<T>. FromString, qui est sûr et ne nécessite pas de modification.",
-    Scope = "member", Target = "~M:DinaCSharp.Services.Key`1.FromString(System.String)~DinaCSharp.Services.Key{`0}")]
-
-[assembly: SuppressMessage( "CodeQuality", "IDE0079:Retirer la suppression inutile",
     Justification = "La suppression était volontaire pour ignorer un warning IDE sur des patterns internes à Text, qui sont intentionnels et ne posent pas de problème de qualité ou de maintenance.",
     Scope = "type", Target = "~T:DinaCSharp.Graphics.Text")]
 

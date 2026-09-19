@@ -2,6 +2,8 @@ using DinaCSharp.Core.Interfaces;
 using DinaCSharp.Extensions;
 using DinaCSharp.Graphics;
 using DinaCSharp.Services;
+using DinaCSharp.Services.Keys;
+using DinaCSharp.Utils;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -19,13 +21,15 @@ namespace DinaCSharp.Core
     /// </summary>
     public class Group : Base, IDraw, IVisible, IEnumerable<IElement>, ICollide, IUpdate, IColor, IClickable, IHovered, IDisposable
     {
+        private const int DEFAULT_FRAMEPADDING = 8;
+        private const int DEFAULT_FRAMETHICKNESS = 2;
         private readonly List<IElement> _elements = [];
-        private Rectangle  _rect;
-        private bool       _visible;
-        private Color      _color;
+        private Rectangle _rect;
+        private bool _visible;
+        private Color _color;
         private readonly Texture2D _pixel;
-        private IDrawingElement?   _title;
-        private Rectangle?         _titleRect;
+        private IDrawingElement? _title;
+        private Rectangle? _titleRect;
         private bool _hovered;
         private bool _disposed;
 
@@ -45,9 +49,9 @@ namespace DinaCSharp.Core
         public Group(Vector2 position = default, Vector2 dimensions = default, int zorder = 0)
             : base(position, dimensions, zorder)
         {
-            _color   = Color.White;
-            Visible  = true;
-            _pixel   = ServiceLocator.Get<Texture2D>(DinaServiceKeys.Texture1px)
+            _color = Color.White;
+            Visible = true;
+            _pixel = ServiceLocator.Get<Texture2D>(DinaServiceKeys.Texture1px)
                 ?? throw new InvalidOperationException("Le service Texture1px n'est pas disponible.");
         }
 
@@ -88,11 +92,11 @@ namespace DinaCSharp.Core
                 }
             }
 
-            Position   = source.Position;
+            Position = source.Position;
             Dimensions = source.Dimensions;
-            ZOrder     = source.ZOrder;
-            Visible    = source.Visible;
-            _color     = Color.White;
+            ZOrder = source.ZOrder;
+            Visible = source.Visible;
+            _color = Color.White;
         }
 
         // ─────────────────────────────────────────────────────────────────────
@@ -128,9 +132,18 @@ namespace DinaCSharp.Core
                 }
 
                 if (_title != null)
+                {
                     _title.Position += offset;
 
-                base.Position  = value;
+                    if (_titleRect.HasValue)
+                    {
+                        var r = _titleRect.Value;
+                        r.Offset((int)offset.X, (int)offset.Y);
+                        _titleRect = r;
+                    }
+                }
+
+                base.Position = value;
                 _rect.Location = new Point(Convert.ToInt32(value.X), Convert.ToInt32(value.Y));
             }
         }
@@ -144,7 +157,7 @@ namespace DinaCSharp.Core
             set
             {
                 base.Dimensions = value;
-                _rect.Size      = new Point(Convert.ToInt32(value.X), Convert.ToInt32(value.Y));
+                _rect.Size = new Point(Convert.ToInt32(value.X), Convert.ToInt32(value.Y));
             }
         }
 
@@ -198,16 +211,25 @@ namespace DinaCSharp.Core
         /// </summary>
         public Color FrameColor { get; set; } = new Color(50, 50, 50, 200);
 
+        private int _frameThickness = UIScaler.Scale(DEFAULT_FRAMETHICKNESS);
         /// <summary>
         /// Épaisseur du trait du cadre en pixels.
         /// </summary>
-        public int FrameThickness { get; set; } = 2;
+        public int FrameThickness
+        {
+            get => _frameThickness;
+            set => _frameThickness = UIScaler.Scale(value);
+        }
 
+        private int _framePadding = UIScaler.Scale(DEFAULT_FRAMEPADDING);
         /// <summary>
         /// Espacement en pixels entre les éléments du groupe et le cadre.
         /// </summary>
-        public int FramePadding { get; set; } = 8;
-
+        public int FramePadding
+        {
+            get => _framePadding;
+            set => _framePadding = UIScaler.Scale(value);
+        }
         // ─────────────────────────────────────────────────────────────────────
         // Gestion des éléments
         // ─────────────────────────────────────────────────────────────────────
@@ -232,6 +254,17 @@ namespace DinaCSharp.Core
         public void SortElements()
         {
             _elements.Sort((e1, e2) => e1.ZOrder.CompareTo(e2.ZOrder));
+        }
+        /// <summary>
+        /// Supprime l'élément du groupe.
+        /// </summary>
+        /// <param name="element">Élément à supprimer.</param>
+        public void Remove(IElement element)
+        {
+            _elements.Remove(element);
+            if (_elements.Count > 0)
+                UpdateDimensions();
+            SortElements();
         }
 
         // ─────────────────────────────────────────────────────────────────────
@@ -354,20 +387,21 @@ namespace DinaCSharp.Core
 
             DisposeTitle();
 
-            HasFrame       = true;
-            FrameColor     = framecolor     ?? new Color(50, 50, 50, 200);
-            FramePadding   = framepadding   ?? 8;
-            FrameThickness = framethickness ?? 2;
+            HasFrame = true;
+            FrameColor = framecolor ?? new Color(50, 50, 50, 200);
+            FramePadding = framepadding ?? DEFAULT_FRAMEPADDING;
+            FrameThickness = framethickness ?? DEFAULT_FRAMETHICKNESS;
 
             // Le padding doit être au moins égal à la moitié de l'interligne pour que le titre ne déborde pas
-            if (FramePadding < font.LineSpacing / 2)
-                FramePadding = font.LineSpacing / 2 + 1;
+            if (_framePadding < font.LineSpacing / 2)
+                _framePadding = font.LineSpacing / 2 + 1;
 
             _title = (shadowcolor.HasValue && shadowoffset.HasValue)
                 ? new ShadowText(font, text, textcolor, shadowcolor.Value, shadowoffset.Value, zorder: zorder)
                 : new Text(font, text, textcolor, Vector2.Zero, zorder: zorder);
 
             PositionTitle();
+            UpdateDimensions();
             return _title;
         }
 
@@ -388,13 +422,14 @@ namespace DinaCSharp.Core
 
             DisposeTitle();
 
-            _title         = title;
-            HasFrame       = true;
-            FrameColor     = framecolor     ?? new Color(50, 50, 50, 200);
-            FramePadding   = framepadding   ?? 8;
-            FrameThickness = framethickness ?? 2;
+            _title = title;
+            HasFrame = true;
+            FrameColor = framecolor ?? new Color(50, 50, 50, 200);
+            FramePadding = framepadding ?? DEFAULT_FRAMEPADDING;
+            FrameThickness = framethickness ?? DEFAULT_FRAMETHICKNESS;
 
             PositionTitle();
+            UpdateDimensions();
             return _title;
         }
 
@@ -406,9 +441,9 @@ namespace DinaCSharp.Core
         /// <param name="framethickness">Épaisseur du trait du cadre en pixels.</param>
         public void AddFrame(Color framecolor, int framepadding, int framethickness)
         {
-            HasFrame       = true;
-            FrameColor     = framecolor;
-            FramePadding   = framepadding;
+            HasFrame = true;
+            FrameColor = framecolor;
+            FramePadding = framepadding;
             FrameThickness = framethickness;
         }
 
@@ -433,11 +468,12 @@ namespace DinaCSharp.Core
                 if (_titleRect.HasValue)
                 {
                     var titleRect = _titleRect.Value;
-                    int t         = FrameThickness;
+                    int t = FrameThickness;
 
                     // Cadre avec interruption en haut pour laisser passer le titre
-                    spritebatch.DrawRectangle(_pixel, new Rectangle(bounds.X, bounds.Y, titleRect.Left, t), FrameColor, t);
-                    int rightX     = bounds.X + titleRect.Right + titleRect.Left + FramePadding;
+                    int leftWidth = titleRect.Left - bounds.X - FramePadding;
+                    spritebatch.DrawRectangle(_pixel, new Rectangle(bounds.X, bounds.Y, leftWidth, t), FrameColor, t);
+                    int rightX = titleRect.Right + FramePadding;
                     int rightWidth = bounds.Right - rightX;
                     spritebatch.DrawRectangle(_pixel, new Rectangle(rightX, bounds.Y, rightWidth, t), FrameColor, t);
                     spritebatch.DrawRectangle(_pixel, new Rectangle(bounds.X, bounds.Bottom - t, bounds.Width, t), FrameColor, t);
@@ -501,10 +537,14 @@ namespace DinaCSharp.Core
             foreach (var element in _elements)
             {
                 var bounds = new Rectangle(element.Position.ToPoint(), element.Dimensions.ToPoint());
-                if (bounds.Left   < minX) minX = bounds.Left;
-                if (bounds.Top    < minY) minY = bounds.Top;
-                if (bounds.Right  > maxX) maxX = bounds.Right;
-                if (bounds.Bottom > maxY) maxY = bounds.Bottom;
+                if (bounds.Left < minX)
+                    minX = bounds.Left;
+                if (bounds.Top < minY)
+                    minY = bounds.Top;
+                if (bounds.Right > maxX)
+                    maxX = bounds.Right;
+                if (bounds.Bottom > maxY)
+                    maxY = bounds.Bottom;
             }
 
             return new Rectangle(minX, minY, maxX - minX, maxY - minY);
@@ -570,35 +610,86 @@ namespace DinaCSharp.Core
         /// </summary>
         private void UpdateDimensions()
         {
-            float x = Position.X;
-            float y = Position.Y;
-            float w = -1;
-            float h = -1;
+            if (_elements.Count == 0)
+                return;
+
+            bool hasAny = false;
+            float minX = Position.X, minY = Position.Y, maxX = -1, maxY = -1;
 
             foreach (var element in _elements)
             {
                 if (element is not IDimensions elemdim || element is not IPosition elempos)
                     continue;
 
-                Vector2 elemPos = elempos.Position;
-                Vector2 elemDim = elemdim.Dimensions;
+                hasAny = true;
+                var p = elempos.Position;
+                var d = elemdim.Dimensions;
 
-                if (elemPos.X < x) x = elemPos.X;
-                if (elemPos.Y < y) y = elemPos.Y;
-
-                // TODO: à activer dès que IFlip sera implémenté sur la classe Image
-                // Vector2 flip = element is IFlip eflip ? eflip.GetFlip() : Vector2.One;
-                // float cfvx = flip.X > 0 ? 1 : 0;
-                // float cfvy = flip.Y > 0 ? 1 : 0;
-                const float cfvx = 1f;
-                const float cfvy = 1f;
-
-                if (w < elemPos.X + elemDim.X * cfvx) w = elemPos.X + elemDim.X * cfvx;
-                if (h < elemPos.Y + elemDim.Y * cfvy) h = elemPos.Y + elemDim.Y * cfvy;
+                if (p.X < minX)
+                    minX = p.X;
+                if (p.Y < minY)
+                    minY = p.Y;
+                if (p.X + d.X > maxX)
+                    maxX = p.X + d.X;
+                if (p.Y + d.Y > maxY)
+                    maxY = p.Y + d.Y;
             }
 
-            if (w > -1 && h > -1)
-                Dimensions = new Vector2(w - (x < 0 ? 0 : x), h - (y < 0 ? 0 : y));
+            if (!hasAny)
+                return;
+
+            // Repositionne le titre sur les bounds actuelles des éléments avant de mesurer un éventuel débordement
+            PositionTitle();
+
+            if (_title != null)
+            {
+                if (_title.Position.X < minX)
+                    minX = _title.Position.X;
+                if (_title.Position.Y < minY)
+                    minY = _title.Position.Y;
+            }
+
+            if (HasFrame)
+            {
+                minX -= FramePadding;
+                minY -= FramePadding;
+                maxX += FramePadding;
+                maxY += FramePadding;
+            }
+
+            // Si le point le plus haut/à gauche (élément, titre, ou bord du cadre) déborde en dessous
+            // de Position, on décale tout le contenu (éléments + titre) pour que Position reste le
+            // vrai coin visuel du rendu — comparé à Position actuel, jamais à 0 en dur.
+            float shiftX = Math.Max(Position.X - minX, 0f);
+            float shiftY = Math.Max(Position.Y - minY, 0f);
+
+            if (shiftX > 0f || shiftY > 0f)
+            {
+                var shift = new Vector2(shiftX, shiftY);
+
+                foreach (var element in _elements)
+                {
+                    if (element is IPosition item)
+                        item.Position += shift;
+                }
+                if (_title != null)
+                {
+                    _title.Position += shift;
+
+                    if (_titleRect.HasValue)
+                    {
+                        var r = _titleRect.Value;
+                        r.Offset((int)shift.X, (int)shift.Y);
+                        _titleRect = r;
+                    }
+                }
+
+                maxX += shift.X;
+                maxY += shift.Y;
+            }
+
+            base.Dimensions = new Vector2(maxX - Position.X, maxY - Position.Y);
+            _rect.Size = new Point(Convert.ToInt32(base.Dimensions.X), Convert.ToInt32(base.Dimensions.Y));
         }
 
         /// <summary>
@@ -616,7 +707,7 @@ namespace DinaCSharp.Core
             float titleY = bounds.Y - _title.Dimensions.Y / 2f;
 
             _title.Position = new Vector2(titleX, titleY);
-            _titleRect      = new Rectangle((int)titleX, (int)titleY,
+            _titleRect = new Rectangle((int)titleX, (int)titleY,
                                              (int)_title.Dimensions.X, (int)_title.Dimensions.Y);
         }
 
@@ -627,7 +718,7 @@ namespace DinaCSharp.Core
         {
             if (_title is IDisposable disposable)
                 disposable.Dispose();
-            _title     = null;
+            _title = null;
             _titleRect = null;
         }
     }

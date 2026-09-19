@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using DinaCSharp.Services.Keys;
 
 namespace DinaCSharp.Graphics
 {
@@ -297,7 +298,7 @@ namespace DinaCSharp.Graphics
                 if (width > 0)
                 {
                     Rectangle rect = new Rectangle((int)leftX, (int)y, width, 1);
-                    spritebatch.Draw(texture, rect, color);
+                    spritebatch.Draw(texture, rect, color.PreMultiply());
                 }
             }
         }
@@ -335,7 +336,7 @@ namespace DinaCSharp.Graphics
             spritebatch.Draw(texture,
                 new Rectangle((int)start.X, (int)start.Y, (int)length, thickness),
                 null,
-                color,
+                color.PreMultiply(),
                 angle,
                 new Vector2(0, thickness / 2f),
                 SpriteEffects.None,

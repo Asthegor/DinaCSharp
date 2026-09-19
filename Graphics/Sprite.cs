@@ -1,5 +1,6 @@
 ﻿using DinaCSharp.Core;
 using DinaCSharp.Core.Interfaces;
+using DinaCSharp.Extensions;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -252,9 +253,9 @@ namespace DinaCSharp.Graphics
                 ArgumentNullException.ThrowIfNull(spritebatch);
 
                 if (Dimensions == default)
-                    spritebatch.Draw(Texture, Position, new Rectangle(0, 0, _texture.Width, _texture.Height), Color, Rotation, Origin, Scale, _effects, ZOrder);
+                    spritebatch.Draw(Texture, Position, new Rectangle(0, 0, _texture.Width, _texture.Height), Color.PreMultiply(), Rotation, Origin, Scale, _effects, ZOrder);
                 else
-                    spritebatch.Draw(Texture, Rectangle, new Rectangle(0, 0, _texture.Width, _texture.Height), Color, Rotation, Origin, _effects, ZOrder);
+                    spritebatch.Draw(Texture, Rectangle, new Rectangle(0, 0, _texture.Width, _texture.Height), Color.PreMultiply(), Rotation, Origin, _effects, ZOrder);
             }
         }
 

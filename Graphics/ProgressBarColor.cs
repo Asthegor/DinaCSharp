@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 using System;
 using DinaCSharp.Services;
+using DinaCSharp.Services.Keys;
 
 namespace DinaCSharp.Graphics
 {

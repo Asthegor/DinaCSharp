@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace DinaCSharp.Services
+﻿namespace DinaCSharp.Services.Keys
 {
     /// <summary>
     /// Représente un tag vide utilisé pour typer les clés de service.

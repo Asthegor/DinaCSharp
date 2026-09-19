@@ -302,7 +302,11 @@ namespace DinaCSharp.Services.Menus
 
             _wasClicked = _isClicked;
         }
-
+        /// <summary>
+        /// Permet d'aligner horizontalement et verticalement le texte dans les dimensions du MenuItem.
+        /// </summary>
+        /// <param name="horizontalAlignment">Alignement horizontal : Left, Center, Right (défaut : Left).</param>
+        /// <param name="verticalAlignment">Alignement vertical : Top, Center, Bottom (défaut : Top).</param>
         public void SetAlignments(HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignment)
         {
             if (_item is IText text)

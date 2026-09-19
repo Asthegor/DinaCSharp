@@ -1,5 +1,6 @@
 ﻿using DinaCSharp.Core;
 using DinaCSharp.Core.Interfaces;
+using DinaCSharp.Extensions;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -180,7 +181,7 @@ namespace DinaCSharp.Graphics
             ArgumentNullException.ThrowIfNull(spritebatch);
 
             if (Visible && _currentRepetition != 0)
-                spritebatch.Draw(_frames[(int)_currentFrame], _rect, null, _color, _rotation, _origin, SpriteEffects.None, ZOrder);
+                spritebatch.Draw(_frames[(int)_currentFrame], _rect, null, _color.PreMultiply(), _rotation, _origin, SpriteEffects.None, ZOrder);
         }
 
         /// <summary>

@@ -10,6 +10,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 using System;
+using DinaCSharp.Services.Keys;
 
 namespace DinaCSharp.Graphics
 {
@@ -221,7 +222,7 @@ namespace DinaCSharp.Graphics
             spritebatch.DrawRectangle(pixel, _checkBoxRect, color, isFilled: filled);
 
             if (texture != null)
-                spritebatch.Draw(texture, _checkBoxRect, color);
+                spritebatch.Draw(texture, _checkBoxRect, color.PreMultiply());
         }
 
         /// <summary>

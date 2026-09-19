@@ -4,6 +4,7 @@ using DinaCSharp.Enums;
 using DinaCSharp.Graphics;
 using DinaCSharp.Inputs;
 using DinaCSharp.Resources;
+using DinaCSharp.Services.Keys;
 using DinaCSharp.Services.Scenes;
 
 using Microsoft.Xna.Framework;

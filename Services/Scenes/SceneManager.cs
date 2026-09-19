@@ -1,9 +1,10 @@
-﻿using DinaCSharp.Events;
+﻿using DinaCSharp.Core.Interfaces;
+using DinaCSharp.Events;
 using DinaCSharp.Exceptions;
 using DinaCSharp.Functions;
 using DinaCSharp.Inputs;
-using DinaCSharp.Core.Interfaces;
 using DinaCSharp.Internal;
+using DinaCSharp.Services.Keys;
 using DinaCSharp.Services.Screen;
 
 using Microsoft.Xna.Framework;
@@ -319,6 +320,16 @@ namespace DinaCSharp.Services.Scenes
                 return (T)value;
             Trace.WriteLine($"Resource '{resourceName}' not found in the resource manager.");
             return default;
+        }
+        /// <summary>
+        /// Vérifie si une ressource existe par son nom dans le gestionnaire de ressources.
+        /// </summary>
+        /// <typeparam key="T">Le type de la ressource à récupérer.</typeparam>
+        /// <param key="resourceName">Le nom de la ressource.</param>
+        /// <returns>La ressource du type spécifié existe (true).</returns>
+        public bool HasResource<T>(string resourceName)
+        {
+            return _values.TryGetValue(resourceName, out var value) && value is T;
         }
         /// <summary>
         /// Supprime une ressource du gestionnaire de ressources par son nom.

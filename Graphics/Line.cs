@@ -1,5 +1,7 @@
 ﻿using DinaCSharp.Core.Interfaces;
+using DinaCSharp.Extensions;
 using DinaCSharp.Services;
+using DinaCSharp.Services.Keys;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -72,7 +74,7 @@ namespace DinaCSharp.Graphics
             ArgumentNullException.ThrowIfNull(spritebatch, nameof(spritebatch));
             Texture2D? texture = ServiceLocator.Get<Texture2D>(DinaServiceKeys.Texture1px);
             if (texture != null)
-                spritebatch.Draw(texture, _position, null, Color, _angle, _origin, _scale, SpriteEffects.None, 0);
+                spritebatch.Draw(texture, _position, null, Color.PreMultiply(), _angle, _origin, _scale, SpriteEffects.None, 0);
         }
         /// <summary>
         /// Crée une copie de la ligne actuelle.
