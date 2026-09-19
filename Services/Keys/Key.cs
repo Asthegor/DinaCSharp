@@ -1,7 +1,7 @@
 ﻿#nullable enable
 using System;
 
-namespace DinaCSharp.Services
+namespace DinaCSharp.Services.Keys
 {
     /// <summary>
     /// Représente une clé fortement typée pour identifier de manière unique des ressources,
@@ -48,7 +48,7 @@ namespace DinaCSharp.Services
         /// Retourne le code de hachage de la clé.
         /// </summary>
         /// <returns>Un entier représentant le code de hachage.</returns>
-        public override int GetHashCode() => _value.GetHashCode(StringComparison.CurrentCulture);
+        public override int GetHashCode() => _value.GetHashCode(StringComparison.InvariantCulture);
         /// <summary>
         /// Compare deux clés du même type pour vérifier l'égalité.
         /// </summary>

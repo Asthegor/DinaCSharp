@@ -1,7 +1,7 @@
-﻿using DinaCSharp.Events;
+﻿using DinaCSharp.Core.Interfaces;
+using DinaCSharp.Events;
 using DinaCSharp.Exceptions;
-using DinaCSharp.Core.Interfaces;
-using DinaCSharp.Services;
+using DinaCSharp.Services.Keys;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;

@@ -1,9 +1,9 @@
-﻿using DinaCSharp.Services;
+﻿using DinaCSharp.Services.Keys;
 
 namespace DinaCSharp.Inputs
 {
     /// <summary>Clés d’action génériques par défaut. Ne fait aucune distinction clavier/gamepad.</summary>
-    public static class DefaultInputs
+    public sealed class DefaultInputs: KeyResolver<DefaultInputs, ActionTag>
     {
         /// <summary>Action de descente.</summary>
         public static readonly Key<ActionTag> Down = Key<ActionTag>.FromString("Down");

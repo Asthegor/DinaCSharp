@@ -1,4 +1,5 @@
 ﻿using DinaCSharp.Core.Interfaces;
+using DinaCSharp.Services.Keys;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
@@ -60,6 +61,10 @@ namespace DinaCSharp.Services.Audio
             }
             MediaPlayer.IsRepeating = false;
         }
+        /// <summary>
+        /// Permet d'enregistrer le SoundManager dans le ServiceLocator sous la clé fournie.
+        /// </summary>
+        /// <param name="key">Clé d'enregistrement du SoundManager.</param>
         public void Register(Key<ServiceTag> key)
         {
             ServiceLocator.Register(key, this);

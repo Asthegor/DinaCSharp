@@ -1,4 +1,5 @@
 ﻿using DinaCSharp.Core.Interfaces;
+using DinaCSharp.Services.Keys;
 
 using Microsoft.Xna.Framework;
 
@@ -50,6 +51,10 @@ namespace DinaCSharp.Services.Fonts
             _instance = new FontProfile(infos, defaultResolution);
             _instance.Register(DinaServiceKeys.FontProfile);
         }
+        /// <summary>
+        /// Permet d'enregistrer le FontProfile dans le ServiceLocator sous la clé fournie.
+        /// </summary>
+        /// <param name="key">Clé d'enregistrement du FontProfile.</param>
         public void Register(Key<ServiceTag> key)
         {
             ServiceLocator.Register(key, this);
