@@ -76,4 +76,9 @@
     <ItemGroup>
 		<InternalsVisibleTo Include="DinaCSharp.Tests" />
 	</ItemGroup>
+    <ItemGroup>
+      <None Update="DLACrypto.dll">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
 </Project>
