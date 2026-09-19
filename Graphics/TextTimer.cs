@@ -8,7 +8,7 @@ namespace DinaCSharp.Graphics
     /// Struct à valeur sémantique : l'assignation (<c>timer = other</c>) produit
     /// une copie complète de l'état, ce qui simplifie la copie dans <see cref="Text.Copy"/>.
     /// </remarks>
-    internal struct TextTimer
+    struct TextTimer
     {
         // ── Configuration ─────────────────────────────────────────────────────
         private float _waitTime;
