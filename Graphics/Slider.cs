@@ -25,7 +25,7 @@ namespace DinaCSharp.Graphics
         private float _maxValue;
         private float _step;
         private float _value;
-        private float _thumbWidth;
+        private readonly float _thumbWidth;
         /// <summary>
         /// Valeur minimale du slider.
         /// </summary>
@@ -128,7 +128,8 @@ namespace DinaCSharp.Graphics
         /// <param name="initialValue">Valeur initiale.</param>
         /// <param name="step">Incrément minimal.</param>
         /// <param name="orientation">Direction de progression du slider.</param>
-        /// <param name="zorder"></param>
+        /// <param name="thumbWidth">Épaisseur du curseur.</param>
+        /// <param name="zorder">Profondeur d'affichage.</param>
         public Slider(Vector2 position, Vector2 dimensions, float minValue, float maxValue, float initialValue, float step = 1f, ProgressDirection orientation = ProgressDirection.LeftToRight, float thumbWidth = 0f, int zorder = 0)
             : base(position, dimensions, zorder)
         {
