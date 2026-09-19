@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DinaCSharp.SpriteSheets
 {
@@ -40,5 +41,13 @@ namespace DinaCSharp.SpriteSheets
         /// </summary>
         /// <param name="name">Le nom à attribuer.</param>
         internal void SetName(string name) => Name = name;
+        /// <summary>
+        /// Récupère une sous-texture par son index numérique (ordre d'apparition dans le XML).
+        /// </summary>
+        public Texture2D GetTextureByIndex(GraphicsDevice graphicsDevice, int index)
+        {
+            string regionName = Regions.Keys.ElementAt(index);
+            return SpriteSheetLoader.LoadSubTexture(graphicsDevice, this, regionName);
+        }
     }
 }
