@@ -1,6 +1,6 @@
 ﻿using DinaCSharp.Services.Keys;
 
-namespace DinaCSharp.Inputs
+namespace DinaCSharp.Input
 {
     /// <summary>Clés d’action génériques par défaut. Ne fait aucune distinction clavier/gamepad.</summary>
     public sealed class DefaultInputs: KeyResolver<DefaultInputs, ActionTag>

@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 
-namespace DinaCSharp.Inputs
+namespace DinaCSharp.Input
 {
     /// <summary>
     /// Fournit un gestionnaire global pour l'enregistrement et la mise à jour des contrôleurs joueurs.

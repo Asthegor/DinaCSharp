@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework.Input;
 
-namespace DinaCSharp.Inputs
+namespace DinaCSharp.Input
 {
     /// <summary>
     /// Classe représentant une touche du clavier.

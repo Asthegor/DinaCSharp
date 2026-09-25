@@ -4,7 +4,7 @@ using DinaCSharp.Core.Interfaces;
 using DinaCSharp.Graphics.Animations;
 using DinaCSharp.Graphics.Texts;
 using DinaCSharp.Graphics.UI;
-using DinaCSharp.Inputs;
+using DinaCSharp.Input;
 using DinaCSharp.Resources;
 using DinaCSharp.Services.Keys;
 using DinaCSharp.Services.Scenes;

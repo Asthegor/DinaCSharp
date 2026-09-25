@@ -1,7 +1,7 @@
 ﻿using DinaCSharp.Core.Events;
 using DinaCSharp.Core.Interfaces;
 using DinaCSharp.Exceptions;
-using DinaCSharp.Inputs;
+using DinaCSharp.Input;
 using DinaCSharp.Internal;
 using DinaCSharp.Services.Keys;
 using DinaCSharp.Services.Screen;

@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DinaCSharp.Inputs
+namespace DinaCSharp.Input
 {
     /// <summary>
     /// Représente le contrôleur d'un joueur, permettant de gérer les liaisons 
