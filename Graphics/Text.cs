@@ -1,6 +1,6 @@
 using DinaCSharp.Core;
 using DinaCSharp.Core.Interfaces;
-using DinaCSharp.Enums;
+using DinaCSharp.Core.Enums;
 using DinaCSharp.Events;
 using DinaCSharp.Extensions;
 using DinaCSharp.Services.Localization;

@@ -1,11 +1,11 @@
 ﻿using DinaCSharp.Core;
-using DinaCSharp.Enums;
 using DinaCSharp.Core.Interfaces;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 using System;
+using DinaCSharp.Core.Enums;
 
 namespace DinaCSharp.Graphics
 {

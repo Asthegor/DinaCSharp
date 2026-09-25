@@ -1,4 +1,4 @@
-﻿using DinaCSharp.Enums;
+﻿using DinaCSharp.Core.Enums;
 
 using Microsoft.Xna.Framework;
 

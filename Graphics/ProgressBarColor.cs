@@ -1,5 +1,4 @@
 ﻿using DinaCSharp.Core;
-using DinaCSharp.Enums;
 using DinaCSharp.Events;
 using DinaCSharp.Core.Interfaces;
 using DinaCSharp.Extensions;
@@ -10,6 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using DinaCSharp.Services;
 using DinaCSharp.Services.Keys;
+using DinaCSharp.Core.Enums;
 
 namespace DinaCSharp.Graphics
 {

@@ -1,6 +1,6 @@
 ﻿using DinaCSharp.Core;
+using DinaCSharp.Core.Enums;
 using DinaCSharp.Core.Interfaces;
-using DinaCSharp.Enums;
 using DinaCSharp.Graphics;
 using DinaCSharp.Inputs;
 using DinaCSharp.Resources;
@@ -17,12 +17,6 @@ using System.Linq;
 
 namespace DinaCSharp.Services.Menus
 {
-    /// <summary>
-    /// Actions possibles dans le menu.
-    /// </summary>
-#pragma warning disable CS1591
-    public enum MenuAction { Up, Down, Left, Right, Activate, Cancel }
-#pragma warning restore CS1591
 
     /// <summary>
     /// Gère l'affichage et l'interaction avec le menu, incluant les éléments, les titres, les icônes et les interactions clavier/souris.

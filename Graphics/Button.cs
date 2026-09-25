@@ -1,12 +1,11 @@
 ﻿using DinaCSharp.Core;
-using DinaCSharp.Enums;
+using DinaCSharp.Core.Enums;
+using DinaCSharp.Core.Interfaces;
 using DinaCSharp.Events;
 using DinaCSharp.Extensions;
-using DinaCSharp.Core.Interfaces;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 
 using System;
 using System.Collections.Generic;

@@ -10,7 +10,6 @@ csharp_prefer_braces = false:silent
 #### Styles de nommage ####
 
 # Règles de nommage
-
 dotnet_naming_rule.interface_should_be_begins_with_i.severity = suggestion
 dotnet_naming_rule.interface_should_be_begins_with_i.symbols = interface
 dotnet_naming_rule.interface_should_be_begins_with_i.style = begins_with_i
@@ -74,3 +73,9 @@ csharp_prefer_simple_using_statement = true:suggestion
 
 dotnet_diagnostic.CA1710.severity = none
 dotnet_diagnostic.CA1707.severity = none
+
+[Core/Enums/*.cs]
+dotnet_diagnostic.CS1591.severity = none
+
+[Core/Enums/TiledPropertyType.cs]
+dotnet_diagnostic.CA1720.severity = none

@@ -2,6 +2,8 @@
 #pragma warning disable CA2227 // Les propriétés de collection doivent être en lecture seule
 #pragma warning disable CS1591 // Commentaire XML manquant pour le type ou le membre visible publiquement
 
+using DinaCSharp.Core.Enums;
+
 using Microsoft.Xna.Framework;
 
 using System;

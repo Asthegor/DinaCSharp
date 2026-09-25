@@ -1,5 +1,7 @@
 ﻿#pragma warning disable CS1591 // Commentaire XML manquant pour le type ou le membre visible publiquement
 
+using DinaCSharp.Core.Enums;
+
 namespace DinaCSharp.Services.Levels
 {
     public interface ILayer
