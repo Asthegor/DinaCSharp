@@ -56,11 +56,6 @@
         <PackageReference Include="MinVer" Version="7.0.0" PrivateAssets="all" />
     </ItemGroup>
     <ItemGroup>
-        <Reference Include="DLACrypto">
-            <HintPath>DLACrypto.dll</HintPath>
-        </Reference>
-    </ItemGroup>
-    <ItemGroup>
         <Compile Update="Messages\Messages.Designer.cs">
             <DesignTime>True</DesignTime>
             <AutoGen>True</AutoGen>
@@ -76,9 +71,11 @@
     <ItemGroup>
 		<InternalsVisibleTo Include="DinaCSharp.Tests" />
 	</ItemGroup>
-    <ItemGroup>
-      <None Update="DLACrypto.dll">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-    </ItemGroup>
+	<ItemGroup>
+		<None Update="DLACrypto.dll">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<Pack>true</Pack>
+			<PackagePath>runtimes/win-x64/native/</PackagePath>
+		</None>
+	</ItemGroup>
 </Project>
