@@ -14,7 +14,7 @@ using System.Reflection;
 using DinaCSharp.Services.Keys;
 using DinaCSharp.Core.Events;
 
-namespace DinaCSharp.Graphics
+namespace DinaCSharp.Graphics.UI
 {
     /// <summary>
     /// Représente un panneau graphique pouvant être dessiné et interactif.

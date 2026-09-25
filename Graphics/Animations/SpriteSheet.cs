@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DinaCSharp.SpriteSheets
+namespace DinaCSharp.Graphics.Animations
 {
     /// <summary>
     /// Représente une feuille de sprite (spritesheet) contenant une texture et un ensemble de régions nommées.

@@ -1,5 +1,6 @@
 ﻿#nullable enable
 
+using DinaCSharp;
 using DinaCSharp.Core;
 using DinaCSharp.Core.Enums;
 using DinaCSharp.Core.Interfaces;
@@ -10,7 +11,7 @@ using Microsoft.Xna.Framework.Input;
 
 using System;
 
-namespace DinaCSharp.Graphics
+namespace DinaCSharp.Graphics.UI
 {
     /// <summary>
     /// Composant graphique représentant un slider (curseur) permettant de sélectionner une valeur dans une plage donnée.

@@ -12,7 +12,7 @@ using System;
 using System.Text;
 using DinaCSharp.Core.Events;
 
-namespace DinaCSharp.Graphics
+namespace DinaCSharp.Graphics.Texts
 {
     /// <summary>
     /// Représente un texte à afficher avec des options de temporisation, d'alignement et de retour à la ligne.

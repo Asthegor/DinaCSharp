@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DinaCSharp.Core.Events;
 
-namespace DinaCSharp.Graphics
+namespace DinaCSharp.Graphics.UI
 {
     /// <summary>
     /// Représente une boîte de liste graphique permettant d'afficher une collection d'éléments avec des fonctionnalités de sélection et de mise à jour.

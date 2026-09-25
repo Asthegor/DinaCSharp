@@ -1,6 +1,8 @@
 ﻿#nullable enable
+using DinaCSharp;
 using DinaCSharp.Core;
 using DinaCSharp.Core.Interfaces;
+using DinaCSharp.Graphics.Texts;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -9,7 +11,7 @@ using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 
-namespace DinaCSharp.Graphics
+namespace DinaCSharp.Graphics.UI
 {
     /// <summary>
     /// Classe représentant un menu déroulant interactif avec des options sélectionnables.

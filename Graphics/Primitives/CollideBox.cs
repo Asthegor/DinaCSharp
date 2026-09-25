@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework;
 
 using System;
 
-namespace DinaCSharp.Graphics
+namespace DinaCSharp.Graphics.Primitives
 {
     /// <summary>
     /// Classe représentant un rectangle de collision pour la gestion des interactions.

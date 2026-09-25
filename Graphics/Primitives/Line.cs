@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 using System;
 
-namespace DinaCSharp.Graphics
+namespace DinaCSharp.Graphics.Primitives
 {
     /// <summary>
     /// Représente une ligne graphique configurable avec une position de départ, une position de fin (ou une distance et un angle), une épaisseur et une couleur.

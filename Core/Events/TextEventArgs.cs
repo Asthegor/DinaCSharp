@@ -1,11 +1,11 @@
-﻿using DinaCSharp.Graphics;
+﻿using DinaCSharp.Graphics.Texts;
 
 using System;
 
 namespace DinaCSharp.Core.Events
 {
     /// <summary>
-    /// Contient les informations d'un événement lié à un <see cref="Graphics.Text"/>.
+    /// Contient les informations d'un événement lié à un <see cref="Graphics.Texts.Text"/>.
     /// </summary>
     /// <remarks>
     /// Initialise une nouvelle instance de <see cref="TextEventArgs"/> pour le Text spécifié.

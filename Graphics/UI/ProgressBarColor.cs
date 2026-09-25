@@ -1,86 +1,97 @@
 ﻿using DinaCSharp.Core;
+using DinaCSharp.Core.Enums;
 using DinaCSharp.Core.Interfaces;
+using DinaCSharp.Extensions;
+using DinaCSharp.Services;
+using DinaCSharp.Services.Keys;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 using System;
-using DinaCSharp.Core.Enums;
 
-namespace DinaCSharp.Graphics
+namespace DinaCSharp.Graphics.UI
 {
     /// <summary>
-    /// Represents a texture-based progress bar rendered using source rect clipping.
+    /// Represents a progress bar rendered entirely using solid colors and primitive rectangles.
     /// </summary>
-    public class ProgressBarTexture : Base, IProgressBar, ICopyable<ProgressBarTexture>, IDisposable
+    public class ProgressBarColor : Base, IProgressBar, ICopyable<ProgressBarColor>, IDisposable
     {
         private bool _visible;
         private float _value;
         private float _minValue;
         private float _maxValue;
+        private int _borderThickness;
 
-        private Texture2D _backTexture;
-        private Texture2D _frontTexture;
-        private Texture2D? _overlayTexture;
+        private Color _frontColor;
+        private Color _backColor;
+        private Color _borderColor;
 
-        private Rectangle _backDestinationRect;
-        private Rectangle _frontDestinationRect;
-        private Rectangle _frontSourceRect;
-        private Rectangle _overlayDestinationRect;
+        private Rectangle _borderRectangle;
+        private Rectangle _innerRectangle;
+        private Rectangle _frontRectangle;
 
         private ProgressDirection _mode;
 
+        private bool _autoIncrement;
+
         // --- Smooth Animation ---
         private float _targetValue;
-        private float _animationSpeed;
+        private float _animationSpeed; // Units per second
         private bool _isAnimating;
 
         // --- Step Interval Progress ---
         private float _timer;
         private float _delay;
         private float _increment;
-        private bool _autoIncrement;
 
         private bool _disposed;
 
+        private readonly Texture2D? _pixelTexture;
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="ProgressBarTexture"/> class.
+        /// Initializes a new instance of the <see cref="ProgressBarColor"/> class.
         /// </summary>
         /// <param name="value">The initial value of the progress bar.</param>
         /// <param name="minValue">The minimum value of the progress bar.</param>
         /// <param name="maxValue">The maximum value of the progress bar.</param>
         /// <param name="position">The position of the progress bar on screen.</param>
-        /// <param name="dimensions">The overall dimensions. If <see cref="Vector2.Zero"/>, dimensions are resolved from the background or fill texture.</param>
-        /// <param name="frontTexture">The texture used for the progress fill bar.</param>
-        /// <param name="backTexture">The texture used for the background element.</param>
-        /// <param name="overlayTexture">Optional frame or overlay texture rendered on top.</param>
-        /// <param name="mode">The progress fill direction direction.</param>
+        /// <param name="dimensions">The overall width and height of the progress bar.</param>
+        /// <param name="frontColor">The fill color representing current progress.</param>
+        /// <param name="borderColor">The border outline color.</param>
+        /// <param name="backColor">The background container color behind the progress fill.</param>
+        /// <param name="borderThickness">The thickness of the outer border in pixels.</param>
+        /// <param name="mode">The progress fill direction mode.</param>
         /// <param name="zorder">The rendering depth order (Z-Order).</param>
-        /// <exception cref="ArgumentNullException">Thrown when <paramref name="frontTexture"/> or <paramref name="backTexture"/> is null.</exception>
-        public ProgressBarTexture(
+        /// <exception cref="InvalidOperationException">Thrown when the required 1x1 pixel texture service is missing.</exception>
+        public ProgressBarColor(
             float value,
             float minValue,
             float maxValue,
             Vector2 position,
             Vector2 dimensions,
-            Texture2D frontTexture,
-            Texture2D backTexture,
-            Texture2D? overlayTexture = null,
+            Color frontColor,
+            Color borderColor,
+            Color backColor,
+            int borderThickness = 1,
             ProgressDirection mode = ProgressDirection.LeftToRight,
             int zorder = 0)
-            : base(position, ResolveDimensions(dimensions, backTexture, frontTexture), zorder)
+            : base(position, dimensions, zorder)
         {
-            _frontTexture = frontTexture ?? throw new ArgumentNullException(nameof(frontTexture));
-            _backTexture = backTexture ?? throw new ArgumentNullException(nameof(backTexture));
-            _overlayTexture = overlayTexture;
-
             _visible = true;
             _mode = mode;
             _maxValue = maxValue;
             _minValue = minValue;
+            _borderThickness = borderThickness;
 
-            _targetValue = Math.Clamp(value, _minValue, _maxValue);
+            _frontColor = frontColor;
+            _borderColor = borderColor;
+            _backColor = backColor;
+
             Value = value;
+
+            _pixelTexture = ServiceLocator.Get<Texture2D>(DinaServiceKeys.Texture1px)
+                ?? throw new InvalidOperationException("The Texture1px service is not available.");
         }
 
         #region Properties
@@ -116,30 +127,31 @@ namespace DinaCSharp.Graphics
         public bool IsAnimating => _isAnimating;
 
         /// <summary>
-        /// Gets or sets the background texture.
+        /// Gets or sets the fill color representing the current progress.
         /// </summary>
-        public Texture2D BackTexture
-        {
-            get => _backTexture;
-            set { _backTexture = value; UpdateRectangles(); }
-        }
+        public Color FrontColor { get => _frontColor; set => _frontColor = value; }
 
         /// <summary>
-        /// Gets or sets the front fill texture.
+        /// Gets or sets the background color behind the progress bar fill.
         /// </summary>
-        public Texture2D FrontTexture
-        {
-            get => _frontTexture;
-            set { _frontTexture = value; UpdateRectangles(); }
-        }
+        public Color BackColor { get => _backColor; set => _backColor = value; }
 
         /// <summary>
-        /// Gets or sets the optional frame or overlay texture.
+        /// Gets or sets the color of the outer border frame.
         /// </summary>
-        public Texture2D? OverlayTexture
+        public Color BorderColor { get => _borderColor; set => _borderColor = value; }
+
+        /// <summary>
+        /// Gets or sets the thickness of the outer border in pixels.
+        /// </summary>
+        public int BorderThickness
         {
-            get => _overlayTexture;
-            set { _overlayTexture = value; UpdateRectangles(); }
+            get => _borderThickness;
+            set
+            {
+                _borderThickness = Math.Max(0, value);
+                UpdateRectangles();
+            }
         }
 
         /// <summary>
@@ -224,7 +236,7 @@ namespace DinaCSharp.Graphics
         /// Smoothly animates the progress bar toward a target value over a specified duration.
         /// </summary>
         /// <param name="targetValue">The target value to reach.</param>
-        /// <param name="durationInSeconds">The duration of the animation in seconds.</param>
+        /// <param name="durationInSeconds">The animation duration in seconds.</param>
         public void AnimateTo(float targetValue, float durationInSeconds)
         {
             _targetValue = Math.Clamp(targetValue, _minValue, _maxValue);
@@ -269,6 +281,7 @@ namespace DinaCSharp.Graphics
 
             float deltaTime = (float)gametime.ElapsedGameTime.TotalSeconds;
 
+            // 1. Smooth fill animation
             if (_isAnimating)
             {
                 _value += _animationSpeed * deltaTime;
@@ -284,6 +297,7 @@ namespace DinaCSharp.Graphics
                 return;
             }
 
+            // 2. Automatic step interval progress
             if (_autoIncrement && _delay > 0)
             {
                 _timer += deltaTime;
@@ -296,40 +310,36 @@ namespace DinaCSharp.Graphics
         }
 
         /// <summary>
-        /// Draws the progress bar using the provided <see cref="SpriteBatch"/>.
+        /// Draws the colored progress bar rectangles using the provided <see cref="SpriteBatch"/>.
         /// </summary>
-        /// <param name="spritebatch">The XNA/MonoGame sprite batch renderer.</param>
+        /// <param name="spritebatch">The sprite batch renderer.</param>
         public void Draw(SpriteBatch spritebatch)
         {
-            ArgumentNullException.ThrowIfNull(spritebatch);
-
-            if (!_visible)
+            if (!_visible || _pixelTexture == null)
                 return;
 
-            // 1. Background texture
-            if (_backTexture != null)
+            // 1. Draw inner background area
+            spritebatch.DrawRectangle(_pixelTexture, _innerRectangle, _backColor, isFilled: true);
+
+            // 2. Draw front progress fill
+            if (_frontRectangle.Width > 0 && _frontRectangle.Height > 0)
             {
-                spritebatch.Draw(_backTexture, _backDestinationRect, Color.White);
+                spritebatch.DrawRectangle(_pixelTexture, _frontRectangle, _frontColor, isFilled: true);
             }
 
-            // 2. Fill texture (using clipped source rect)
-            if (_frontTexture != null && _frontDestinationRect.Width > 0 && _frontDestinationRect.Height > 0)
+            // 3. Draw outer border frame on top
+            if (_borderThickness > 0)
             {
-                spritebatch.Draw(_frontTexture, _frontDestinationRect, _frontSourceRect, Color.White);
-            }
-
-            // 3. Optional border / frame texture
-            if (_overlayTexture != null)
-            {
-                spritebatch.Draw(_overlayTexture, _overlayDestinationRect, Color.White);
+                spritebatch.DrawRectangle(_pixelTexture, _borderRectangle, _borderColor, thickness: _borderThickness, isFilled: false);
             }
         }
+
         #endregion
 
         #region Internal Logic
 
         /// <summary>
-        /// Recalculates and updates destination and source clipping rectangles based on current value and direction mode.
+        /// Recalculates and updates inner background, border, and front fill rectangles based on current values.
         /// </summary>
         private void UpdateRectangles()
         {
@@ -338,84 +348,53 @@ namespace DinaCSharp.Graphics
             int width = (int)Dimensions.X;
             int height = (int)Dimensions.Y;
 
-            _backDestinationRect = new Rectangle(posX, posY, width, height);
-            _overlayDestinationRect = _backDestinationRect;
+            // Overall boundary rectangle (outer border)
+            _borderRectangle = new Rectangle(posX, posY, width, height);
 
+            // Interior area inside border padding
+            int innerX = posX + _borderThickness;
+            int innerY = posY + _borderThickness;
+            int innerWidth = Math.Max(0, width - (_borderThickness * 2));
+            int innerHeight = Math.Max(0, height - (_borderThickness * 2));
+
+            _innerRectangle = new Rectangle(innerX, innerY, innerWidth, innerHeight);
+
+            // Progress ratio [0..1]
             float range = _maxValue - _minValue;
             float ratio = range > 0f ? (_value - _minValue) / range : 0f;
 
-            int texWidth = _frontTexture.Width;
-            int texHeight = _frontTexture.Height;
-
-            float destX = posX;
-            float destY = posY;
-            float destW = width;
-            float destH = height;
-
-            float srcX = 0;
-            float srcY = 0;
-            float srcW = texWidth;
-            float srcH = texHeight;
+            float frontX = innerX;
+            float frontY = innerY;
+            float frontWidth = innerWidth;
+            float frontHeight = innerHeight;
 
             switch (_mode)
             {
                 case ProgressDirection.LeftToRight:
-                    destW = width * ratio;
-                    srcW = texWidth * ratio;
+                    frontWidth = innerWidth * ratio;
                     break;
 
                 case ProgressDirection.RightToLeft:
-                    destW = width * ratio;
-                    destX = posX + width - destW;
-
-                    srcW = texWidth * ratio;
-                    srcX = texWidth - srcW;
+                    frontWidth = innerWidth * ratio;
+                    frontX = innerX + innerWidth - frontWidth;
                     break;
 
                 case ProgressDirection.TopToBottom:
-                    destH = height * ratio;
-                    srcH = texHeight * ratio;
+                    frontHeight = innerHeight * ratio;
                     break;
 
                 case ProgressDirection.BottomToTop:
-                    destH = height * ratio;
-                    destY = posY + height - destH;
-
-                    srcH = texHeight * ratio;
-                    srcY = texHeight - srcH;
+                    frontHeight = innerHeight * ratio;
+                    frontY = innerY + innerHeight - frontHeight;
                     break;
             }
 
-            _frontDestinationRect = new Rectangle(
-                (int)Math.Round(destX),
-                (int)Math.Round(destY),
-                (int)Math.Round(destW),
-                (int)Math.Round(destH)
+            _frontRectangle = new Rectangle(
+                (int)Math.Round(frontX),
+                (int)Math.Round(frontY),
+                (int)Math.Round(frontWidth),
+                (int)Math.Round(frontHeight)
             );
-
-            _frontSourceRect = new Rectangle(
-                (int)Math.Round(srcX),
-                (int)Math.Round(srcY),
-                (int)Math.Round(srcW),
-                (int)Math.Round(srcH)
-            );
-        }
-
-        /// <summary>
-        /// Automatically resolves initial dimensions if zero values are passed, defaulting to texture sizes.
-        /// </summary>
-        private static Vector2 ResolveDimensions(Vector2 dimensions, Texture2D backTex, Texture2D frontTex)
-        {
-            if (dimensions != Vector2.Zero)
-                return dimensions;
-
-            if (backTex != null)
-                return new Vector2(backTex.Width, backTex.Height);
-
-            if (frontTex != null)
-                return new Vector2(frontTex.Width, frontTex.Height);
-
-            return Vector2.Zero;
         }
 
         #endregion
@@ -423,15 +402,15 @@ namespace DinaCSharp.Graphics
         #region ICopyable & IDisposable
 
         /// <summary>
-        /// Creates a deep copy of the current <see cref="ProgressBarTexture"/> instance.
+        /// Creates a deep copy of the current <see cref="ProgressBarColor"/> instance.
         /// </summary>
-        /// <returns>A new <see cref="ProgressBarTexture"/> instance with matching properties.</returns>
-        public ProgressBarTexture Copy()
+        /// <returns>A new <see cref="ProgressBarColor"/> instance with matching properties.</returns>
+        public ProgressBarColor Copy()
         {
-            var copy = new ProgressBarTexture(
+            var copy = new ProgressBarColor(
                 _value, _minValue, _maxValue, Position, Dimensions,
-                _frontTexture, _backTexture, _overlayTexture,
-                _mode, ZOrder)
+                _frontColor, _borderColor, _backColor,
+                _borderThickness, _mode, ZOrder)
             {
                 Visible = _visible,
                 AutoIncrement = _autoIncrement,
@@ -449,7 +428,7 @@ namespace DinaCSharp.Graphics
         }
 
         /// <summary>
-        /// Releases resources used by the <see cref="ProgressBarTexture"/> instance.
+        /// Releases resources used by the <see cref="ProgressBarColor"/> instance.
         /// </summary>
         public void Dispose()
         {

@@ -1,4 +1,4 @@
-namespace DinaCSharp.Graphics
+namespace DinaCSharp.Graphics.Texts
 {
     /// <summary>
     /// Encapsule la logique de temporisation d'affichage d'un texte.

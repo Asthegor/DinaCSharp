@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 using System;
 
-namespace DinaCSharp.Graphics
+namespace DinaCSharp.Graphics.Texts
 {
     /// <summary>
     /// Framework component that animates an <see cref="IText"/> instance (such as <c>Text</c> or <c>ShadowText</c>)

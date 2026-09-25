@@ -8,7 +8,7 @@ using System.Globalization;
 using System.IO;
 using System.Xml.Linq;
 
-namespace DinaCSharp.SpriteSheets
+namespace DinaCSharp.Graphics.Animations
 {
 
     /// <summary>

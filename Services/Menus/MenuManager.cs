@@ -1,7 +1,9 @@
 ﻿using DinaCSharp.Core;
 using DinaCSharp.Core.Enums;
 using DinaCSharp.Core.Interfaces;
-using DinaCSharp.Graphics;
+using DinaCSharp.Graphics.Animations;
+using DinaCSharp.Graphics.Texts;
+using DinaCSharp.Graphics.UI;
 using DinaCSharp.Inputs;
 using DinaCSharp.Resources;
 using DinaCSharp.Services.Keys;

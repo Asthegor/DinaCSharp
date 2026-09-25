@@ -12,7 +12,7 @@ using DinaCSharp.Services.Keys;
 using DinaCSharp.Core.Enums;
 using DinaCSharp.Core.Events;
 
-namespace DinaCSharp.Graphics
+namespace DinaCSharp.Graphics.UI
 {
     /// <summary>
     /// Classe représentant une case à cocher graphique interactive.

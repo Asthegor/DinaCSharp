@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 using System;
 
-namespace DinaCSharp.Graphics
+namespace DinaCSharp.Graphics.Animations
 {
     /// <summary>
     /// Représente un sprite (image) avec des propriétés telles que la couleur, la position, la rotation, le redimensionnement et l'effet de réflexion.

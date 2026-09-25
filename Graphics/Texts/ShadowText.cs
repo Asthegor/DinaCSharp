@@ -4,7 +4,7 @@ using DinaCSharp.Core.Interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace DinaCSharp.Graphics
+namespace DinaCSharp.Graphics.Texts
 {
     /// <summary>
     /// Représente un texte avec une ombre portée.

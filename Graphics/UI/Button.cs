@@ -3,6 +3,8 @@ using DinaCSharp.Core.Enums;
 using DinaCSharp.Core.Events;
 using DinaCSharp.Core.Interfaces;
 using DinaCSharp.Extensions;
+using DinaCSharp.Graphics.Animations;
+using DinaCSharp.Graphics.Texts;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -11,7 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace DinaCSharp.Graphics
+namespace DinaCSharp.Graphics.UI
 {
     /// <summary>
     /// Classe représentant un bouton graphique interactif avec gestion d'état via flags et événements.

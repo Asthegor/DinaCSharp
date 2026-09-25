@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.ObjectModel;
 
-namespace DinaCSharp.Graphics
+namespace DinaCSharp.Graphics.Animations
 {
     /// <summary>
     /// Représente une animation graphique composée de plusieurs frames (images).
