@@ -1,9 +1,9 @@
 using DinaCSharp.Core.Interfaces;
 using DinaCSharp.Extensions;
 using DinaCSharp.Graphics;
+using DinaCSharp.Helpers;
 using DinaCSharp.Services;
 using DinaCSharp.Services.Keys;
-using DinaCSharp.Utils;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;

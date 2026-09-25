@@ -1,15 +1,14 @@
 ﻿using DinaCSharp.Core;
-using DinaCSharp.Events;
+using DinaCSharp.Core.Enums;
 using DinaCSharp.Core.Interfaces;
 using DinaCSharp.Extensions;
+using DinaCSharp.Services;
+using DinaCSharp.Services.Keys;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 using System;
-using DinaCSharp.Services;
-using DinaCSharp.Services.Keys;
-using DinaCSharp.Core.Enums;
 
 namespace DinaCSharp.Graphics
 {

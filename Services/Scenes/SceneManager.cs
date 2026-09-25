@@ -1,7 +1,6 @@
 ﻿using DinaCSharp.Core.Events;
 using DinaCSharp.Core.Interfaces;
 using DinaCSharp.Exceptions;
-using DinaCSharp.Functions;
 using DinaCSharp.Inputs;
 using DinaCSharp.Internal;
 using DinaCSharp.Services.Keys;
@@ -166,7 +165,7 @@ namespace DinaCSharp.Services.Scenes
                 if (!_scenes.ContainsKey(DinaSceneKeys.FrameworkLogo))
                     AddScene(DinaSceneKeys.FrameworkLogo, () => new FrameworkLogoScene(this));
 
-                DinaFunctions.FireAndForget(BaseSetCurrentScene(DinaSceneKeys.FrameworkLogo, false));
+                TaskHelper.FireAndForget(BaseSetCurrentScene(DinaSceneKeys.FrameworkLogo, false));
                 return;
             }
 

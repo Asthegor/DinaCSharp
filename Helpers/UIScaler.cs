@@ -2,7 +2,7 @@
 
 using System;
 
-namespace DinaCSharp.Utils
+namespace DinaCSharp.Helpers
 {
     /// <summary>
     /// Permet de scaler les éléments UI en fonction de la résolution de l'écran.

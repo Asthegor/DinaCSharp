@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace DinaCSharp.Utils
+namespace DinaCSharp.Helpers
 {
     /// <summary>
     /// Fournit des méthodes utilitaires pour prendre un snapshot des propriétés publiques d'un objet

@@ -1,5 +1,5 @@
 ﻿using DinaCSharp.Core.Enums;
-using DinaCSharp.Functions;
+using DinaCSharp.Helpers;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
@@ -283,7 +283,7 @@ namespace DinaCSharp.Services.Levels
                     return (T)(object)attribute.Value;
 
                 if (typeof(T) == typeof(Color))
-                    return (T)(object)DinaFunctions.FromHex(attribute.Value);
+                    return (T)(object)ColorHelper.FromHex(attribute.Value);
 
                 if (typeof(T).IsEnum)
                     return (T)Enum.Parse(typeof(T), attribute.Value, ignoreCase: true);
