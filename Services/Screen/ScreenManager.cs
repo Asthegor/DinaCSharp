@@ -1,5 +1,4 @@
-﻿using DinaCSharp.Events;
-using DinaCSharp.Core.Interfaces;
+﻿using DinaCSharp.Core.Interfaces;
 using DinaCSharp.Utils;
 
 using Microsoft.Xna.Framework;
@@ -9,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DinaCSharp.Services.Keys;
+using DinaCSharp.Core.Events;
 
 namespace DinaCSharp.Services.Screen
 {

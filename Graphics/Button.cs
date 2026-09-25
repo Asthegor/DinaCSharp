@@ -1,7 +1,7 @@
 ﻿using DinaCSharp.Core;
 using DinaCSharp.Core.Enums;
+using DinaCSharp.Core.Events;
 using DinaCSharp.Core.Interfaces;
-using DinaCSharp.Events;
 using DinaCSharp.Extensions;
 
 using Microsoft.Xna.Framework;

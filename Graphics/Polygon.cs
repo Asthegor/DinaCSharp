@@ -1,5 +1,4 @@
 ﻿using DinaCSharp.Core;
-using DinaCSharp.Events;
 using DinaCSharp.Extensions;
 using DinaCSharp.Core.Interfaces;
 using DinaCSharp.Services;
@@ -13,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using DinaCSharp.Services.Keys;
+using DinaCSharp.Core.Events;
 
 namespace DinaCSharp.Graphics
 {
@@ -336,7 +336,7 @@ namespace DinaCSharp.Graphics
             spritebatch.Draw(texture,
                 new Rectangle((int)start.X, (int)start.Y, (int)length, thickness),
                 null,
-                color.PreMultiply(),
+color.PreMultiply(),
                 angle,
                 new Vector2(0, thickness / 2f),
                 SpriteEffects.None,

@@ -1,7 +1,6 @@
 using DinaCSharp.Core;
 using DinaCSharp.Core.Interfaces;
 using DinaCSharp.Core.Enums;
-using DinaCSharp.Events;
 using DinaCSharp.Extensions;
 using DinaCSharp.Services.Localization;
 
@@ -11,6 +10,7 @@ using Microsoft.Xna.Framework.Input;
 
 using System;
 using System.Text;
+using DinaCSharp.Core.Events;
 
 namespace DinaCSharp.Graphics
 {

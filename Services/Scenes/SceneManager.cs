@@ -1,5 +1,5 @@
-﻿using DinaCSharp.Core.Interfaces;
-using DinaCSharp.Events;
+﻿using DinaCSharp.Core.Events;
+using DinaCSharp.Core.Interfaces;
 using DinaCSharp.Exceptions;
 using DinaCSharp.Functions;
 using DinaCSharp.Inputs;
