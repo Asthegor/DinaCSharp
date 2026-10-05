@@ -33,7 +33,7 @@ namespace DinaCSharp.Services.Scenes
         public static SceneManager InitializeAndRegister(Game game)
         {
             ArgumentNullException.ThrowIfNull(game);
-            lock (_mutex)
+            lock (_lock)
             {
                 _singleton ??= new SceneManager(game);
                 _singleton.Register(DinaServiceKeys.SceneManager);
@@ -481,7 +481,7 @@ namespace DinaCSharp.Services.Scenes
         #region === Attributs & membres internes ===
         // Singleton interne
         private static SceneManager? _singleton;
-        private static readonly Lock _mutex = new Lock();
+        private static readonly Lock _lock = new Lock();
 
         // Game et Content
         private readonly Game _game;
