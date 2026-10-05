@@ -9,7 +9,6 @@
         <Description>DinaCSharp est un moteur de jeu personnalisé développé par Dominique LACOMBE et réalisé à partir de MonoGame.</Description>
         <NeutralLanguage>fr-FR</NeutralLanguage>
         <GenerateDocumentationFile>True</GenerateDocumentationFile>
-        <DocumentationFile>$(OutputPath)\DinaCSharp.xml</DocumentationFile>
         <Nullable>enable</Nullable>
         <RootNamespace>DinaCSharp</RootNamespace>
         <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
@@ -69,9 +68,6 @@
         </EmbeddedResource>
     </ItemGroup>
     <ItemGroup>
-		<InternalsVisibleTo Include="DinaCSharp.Tests" />
-	</ItemGroup>
-	<ItemGroup>
 		<None Update="DLACrypto.dll">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 			<Pack>true</Pack>
