@@ -2,6 +2,9 @@
 
 namespace DinaCSharp.Extensions
 {
+    /// <summary>
+    /// Méthodes d'extension pour <see cref="Color"/>.
+    /// </summary>
     public static class ColorExtensions
     {
 
