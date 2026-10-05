@@ -1,6 +1,6 @@
-﻿using DinaCSharp.Services;
+﻿using DinaCSharp.Graphics.Animations;
+using DinaCSharp.Services;
 using DinaCSharp.Services.Keys;
-using DinaCSharp.SpriteSheets;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;

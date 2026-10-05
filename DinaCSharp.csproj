@@ -68,8 +68,10 @@
         </EmbeddedResource>
     </ItemGroup>
     <ItemGroup>
-      <None Update="DLACrypto.dll">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-    </ItemGroup>
+		<None Update="DLACrypto.dll">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<Pack>true</Pack>
+			<PackagePath>runtimes/win-x64/native/</PackagePath>
+		</None>
+	</ItemGroup>
 </Project>

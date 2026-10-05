@@ -7,6 +7,9 @@ using System;
 
 namespace DinaCSharp.Extensions
 {
+    /// <summary>
+    /// Méthodes d'extension pour <see cref="SpriteBatch"/> : dessin de rectangles, lignes, arcs et coins arrondis.
+    /// </summary>
     public static class SpriteBatchExtensions
     {
         /// <summary>

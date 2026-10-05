@@ -5,9 +5,11 @@ using System;
 
 namespace DinaCSharp.Extensions
 {
+    /// <summary>
+    /// Méthodes d'extension pour <see cref="Texture2D"/>.
+    /// </summary>
     public static class Texture2DExtensions
     {
-
         /// <summary>
         /// Récupère les dimensions d'une texture sous forme d'un vecteur 2D.
         /// </summary>

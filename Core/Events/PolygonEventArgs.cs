@@ -1,4 +1,4 @@
-﻿using DinaCSharp.Graphics;
+﻿using DinaCSharp.Graphics.Primitives;
 
 using System;
 
