@@ -18,7 +18,6 @@ namespace DinaCSharp.Graphics.UI
         private const float DELAY_KEY_STROKE = 0.5f;
         private const float REPEAT_INTERVAL = 0.25f;  // Intervalle entre les répétitions
 
-        //private readonly Group _inputTextGroup = [];
         private readonly Panel _panel;
         private readonly Text _placeHolder;
         private readonly Text _text;
@@ -93,12 +92,6 @@ namespace DinaCSharp.Graphics.UI
             UpdateCursorPosition();
             _cursor.Visible = false;
 
-            //_inputTextGroup.Add(_panel);
-            //_inputTextGroup.Add(_text);
-            //_inputTextGroup.Add(_placeHolder);
-            //_inputTextGroup.Add(_cursor);
-
-            //_inputTextGroup.Position = position;
             Position = position;
 
             _isActive = false;
@@ -133,7 +126,6 @@ namespace DinaCSharp.Graphics.UI
         /// <summary>
         /// Position du champ de texte.
         /// </summary>
-        //public Vector2 Position { get => _inputTextGroup.Position; set => _inputTextGroup.Position = value; }
         public Vector2 Position
         {
             get => _panel.Position;
@@ -148,7 +140,6 @@ namespace DinaCSharp.Graphics.UI
         /// <summary>
         /// Dimensions du champ de texte.
         /// </summary>
-        //public Vector2 Dimensions { get => _inputTextGroup.Dimensions; set => _inputTextGroup.Dimensions = value; }
         public Vector2 Dimensions
         {
             get => _panel.Dimensions;
@@ -163,7 +154,6 @@ namespace DinaCSharp.Graphics.UI
         /// <summary>
         /// Ordre d'affichage (Z-order) de la zone de saisie.
         /// </summary>
-        //public int ZOrder { get => _inputTextGroup.ZOrder; set => _inputTextGroup.ZOrder = value; }
         public int ZOrder
         {
             get => _zorder;
@@ -261,9 +251,7 @@ namespace DinaCSharp.Graphics.UI
             if (!_visible)
                 return;
 
-            //_inputTextGroup.Draw(spritebatch);
             _panel.Draw(spritebatch);
-
 
             if (_isActive)
                 _cursor.Draw(spritebatch);
