@@ -12,30 +12,22 @@ namespace DinaCSharp.Graphics.Texts
     /// une instance <see cref="Text"/> interne pour l'ombre.
     /// </summary>
     /// <remarks>
-    /// Initialise un <see cref="ShadowText"/>.
+    /// Initialise un <see cref="ShadowText"/> avec les paramètres spécifiés.
     /// </remarks>
-    public class ShadowText : Text, ICopyable<ShadowText>
+    /// <param name="font">Police de caractères.</param>
+    /// <param name="content">Contenu textuel.</param>
+    /// <param name="color">Couleur du texte principal.</param>
+    /// <param name="position">Position du texte principal à l'écran.</param>
+    /// <param name="shadowColor">Couleur de l'ombre.</param>
+    /// <param name="shadowOffset">Décalage de l'ombre par rapport au texte.</param>
+    /// <param name="halign">Alignement horizontal (défaut : Left).</param>
+    /// <param name="valign">Alignement vertical (défaut : Top).</param>
+    /// <param name="zorder">Ordre de superposition (défaut : 0). L'ombre est toujours à <c>zorder - 1</c>.</param>
+    public class ShadowText(SpriteFont font, string content, Color color, Color shadowColor, Vector2 shadowOffset,
+                      Vector2 position = default, HorizontalAlignment halign = default, VerticalAlignment valign = default, int zorder = 0) : Text(font, content, color, position, halign, valign, zorder), ICopyable<ShadowText>
     {
-        private readonly Text _shadow;
-        private Vector2 _offset;
-        /// <summary>
-        /// Initialise une nouvelle instance de la classe ShadowText avec les paramètres spécifiés.
-        /// </summary>
-        /// <param name="font">Police de caractères.</param>
-        /// <param name="content">Contenu textuel.</param>
-        /// <param name="color">Couleur du texte principal.</param>
-        /// <param name="position">Position du texte principal à l'écran.</param>
-        /// <param name="shadowColor">Couleur de l'ombre.</param>
-        /// <param name="shadowOffset">Décalage de l'ombre par rapport au texte.</param>
-        /// <param name="halign">Alignement horizontal (défaut : Left).</param>
-        /// <param name="valign">Alignement vertical (défaut : Top).</param>
-        /// <param name="zorder">Ordre de superposition (défaut : 0). L'ombre est toujours à <c>zorder - 1</c>.</param>
-        public ShadowText(SpriteFont font, string content, Color color, Color shadowColor, Vector2 shadowOffset,
-                          Vector2 position = default, HorizontalAlignment halign = default, VerticalAlignment valign = default, int zorder = 0) : base(font, content, color, position, halign, valign, zorder)
-        {
-            _shadow = new Text(font, content, shadowColor, position + shadowOffset, halign, valign, zorder - 1);
-            _offset = shadowOffset;
-        }
+        private readonly Text _shadow = new Text(font, content, shadowColor, position + shadowOffset, halign, valign, zorder - 1);
+        private Vector2 _offset = shadowOffset;
 
         // ─────────────────────────────────────────────────────────────────────
         // Propriétés spécifiques à l'ombre

@@ -46,6 +46,10 @@
         /// Clé représentant le gestionnaire de ressources.
         /// </summary>
         public static readonly Key<ServiceTag> ResourceManager = Key<ServiceTag>.FromString("ResourceManager");
+        /// <summary>
+        /// Clé représentant le gestionnaire de journalisation.
+        /// </summary>
+        public static readonly Key<ServiceTag> LogManager = Key<ServiceTag>.FromString("LogManager");
 
     }
 }

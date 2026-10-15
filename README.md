@@ -1,30 +1,33 @@
 # DinaCSharp
-➡ [English version](#dinaframework-english)
+➡ [English version](#dinacsharp-english)
 
 DinaCSharp est un framework développé à partir de [MonoGame](https://github.com/MonoGame/MonoGame), conçu pour faciliter la création de jeux multiplateformes en C#.
 
 ## Fonctionnalités
 
-- **Controls** : Composants pour gérer les entrées utilisateur (clavier et gamepad).
-- **Core** : Regroupe les entités principales du framework.
-- **Extensions** : Méthodes pour effectuer des conversions (ToPoint et ToVector2).
-- **Functions** : Utilitaires généraux pour diverses opérations.
-- **Graphics** : Outils pour la gestion et le rendu des éléments graphiques.
-- **LevelManager** : Chargement et gestion des niveaux issus de [Tiled](https://www.mapeditor.org/).
-- **Menus** : Structures pour créer et gérer des menus dans le jeu.
-- **Scenes** : Gestion des différentes scènes ou états du jeu.
-- **Screen** : Gestion des changements de résolution.
-- **Services** : Annuaire global (ServiceLocator) des services.
-- **SoundManager** : Gestion centralisée des musiques et des bruitages (SFX).
-- **FontManager** : Gestion centralisée des polices (`SpriteFont`) pour éviter les doublons.
-- **Localization** : Support multilingue pour les jeux.
+- **Core** : Classes de base, énumérations, arguments d'événements et interfaces du framework.
+- **Extensions** : Méthodes d'extension (`Color`, `Dictionary`, `SpriteBatch`, `Texture2D`).
+- **Graphics** : Animations et sprites, primitives (lignes, polygones, boîtes de collision), textes et composants d'interface (boutons, cases à cocher, listes, curseurs, barres de progression, etc.).
+- **Helpers** : Utilitaires généraux (couleurs, chaînes, mise à l'échelle de l'interface, etc.).
+- **Input** : Gestion des entrées utilisateur (clavier et gamepad).
+- **Services** : Annuaire global (`ServiceLocator`) et services du framework :
+  - **Audio** (`SoundManager`) : Gestion centralisée des musiques et des bruitages (SFX).
+  - **Fonts** (`FontManager`) : Gestion centralisée des polices (`SpriteFont`) pour éviter les doublons.
+  - **Keys** : Clés fortement typées pour identifier des ressources, des services ou des zones.
+  - **Levels** (`LevelManager`) : Chargement et gestion des niveaux issus de [Tiled](https://www.mapeditor.org/).
+  - **Localization** (`LocalizationManager`) : Support multilingue pour les jeux.
+  - **Logs** (`LogManager`) : Journalisation vers un fichier et/ou la console.
+  - **Menus** (`MenuManager`) : Création et gestion des menus dans le jeu.
+  - **Save** (`SaveManager`) : Sauvegarde et chargement d'objets dans des fichiers chiffrés (via la bibliothèque native `DLACrypto.dll`, Windows x64).
+  - **Scenes** (`SceneManager`) : Gestion des différentes scènes ou états du jeu.
+  - **Screen** (`ScreenManager`) : Gestion des changements de résolution.
 
 ## Prérequis
 
-- [.NET Framework 4.7.2](https://dotnet.microsoft.com/download/dotnet-framework/net472) ou version ultérieure.
-- [MonoGame 3.8.2](https://github.com/MonoGame/MonoGame/releases/tag/v3.8.2) ou version ultérieure.
+- [.NET 10](https://dotnet.microsoft.com/download/dotnet/10.0).
+- [MonoGame 3.8.5](https://github.com/MonoGame/MonoGame/releases/tag/v3.8.5) (`MonoGame.Framework.DesktopGL`).
 
-## Installation
+## Compilation depuis les sources
 
 1. Clonez le dépôt :
 
@@ -36,15 +39,9 @@ DinaCSharp est un framework développé à partir de [MonoGame](https://github.c
 3. Restaurez les packages NuGet nécessaires.
 
 ## Utilisation
-Compilez le projet DinaCSharp.
 
-1. Ajoutez le projet `DinaCSharp` à votre solution.
-2. Ajoutez une référence au projet `DinaCSharp` dans votre projet de jeu.
-3. Vous n'avez plus qu'à utiliser les fonctionnalités du framework lors du développement de votre jeu.
-
-Ajoutez une référence à la dll DinaCSharp.dll dans votre projet de jeu.
-
-Vous n'avez plus qu'à utiliser les fonctionnalités du moteur lors du développement de votre jeu.
+1. Ajoutez le package NuGet `DinaCSharp` à votre projet de jeu. Le package `MonoGame.Framework.DesktopGL` est installé automatiquement comme dépendance.
+2. Vous n'avez plus qu'à utiliser les fonctionnalités du framework lors du développement de votre jeu.
 
 ## Documentation
 La documentation détaillée est en cours de développement.
@@ -61,56 +58,56 @@ Si vous utilisez ces sources, merci de mentionner cette page dans les crédits d
 
 ---
 
-# DinaFramework (English)
+# DinaCSharp (English)
 
-DinaCSharp is a custom game engine built on top of [MonoGame](https://github.com/MonoGame/MonoGame), designed to simplify the creation of cross-platform games in C#.
+DinaCSharp is a framework built on top of [MonoGame](https://github.com/MonoGame/MonoGame), designed to simplify the creation of cross-platform games in C#.
 
 ## Features
 
-- **Controls**: Components for handling user input (keyboard and gamepad).
-- **Core**: Contains the main entities of the framework.
-- **Extensions**: Methods for performing conversions (ToPoint and ToVector2).
-- **Functions**: General utilities for various operations.
-- **Graphics**: Tools for managing and rendering graphical elements.
-- **LevelManager**: Loading and managing game levels from [Tiled](https://www.mapeditor.org/).
-- **Menus**: Structures for creating and managing in-game menus.
-- **Scenes**: Management of different game scenes or states.
-- **Screen**: Resolution management.
-- **Services**: Global service registry (ServiceLocator).
-- **SoundManager**: Centralized management of music and sound effects (SFX).
-- **FontManager**: Centralized management of fonts (`SpriteFont`) to avoid duplicates.
-- **Localization**: Multilingual support for games.
+- **Core**: Base classes, enumerations, event arguments and interfaces of the framework.
+- **Extensions**: Extension methods (`Color`, `Dictionary`, `SpriteBatch`, `Texture2D`).
+- **Graphics**: Animations and sprites, primitives (lines, polygons, collision boxes), texts and UI components (buttons, checkboxes, lists, sliders, progress bars, etc.).
+- **Helpers**: General utilities (colors, strings, UI scaling, etc.).
+- **Input**: User input handling (keyboard and gamepad).
+- **Services**: Global service registry (`ServiceLocator`) and framework services:
+  - **Audio** (`SoundManager`): Centralized management of music and sound effects (SFX).
+  - **Fonts** (`FontManager`): Centralized management of fonts (`SpriteFont`) to avoid duplicates.
+  - **Keys**: Strongly typed keys to identify resources, services or areas.
+  - **Levels** (`LevelManager`): Loading and managing game levels from [Tiled](https://www.mapeditor.org/).
+  - **Localization** (`LocalizationManager`): Multilingual support for games.
+  - **Logs** (`LogManager`): Logging to a file and/or the console.
+  - **Menus** (`MenuManager`): Creating and managing in-game menus.
+  - **Save** (`SaveManager`): Saving and loading objects to and from encrypted files (through the native `DLACrypto.dll` library, Windows x64).
+  - **Scenes** (`SceneManager`): Management of different game scenes or states.
+  - **Screen** (`ScreenManager`): Resolution management.
 
 ## Requirements
 
-- [.NET Framework 4.7.2](https://dotnet.microsoft.com/download/dotnet-framework/net472) or later.
-- [MonoGame 3.8.2](https://github.com/MonoGame/MonoGame/releases/tag/v3.8.2) or later.
+- [.NET 10](https://dotnet.microsoft.com/download/dotnet/10.0).
+- [MonoGame 3.8.5](https://github.com/MonoGame/MonoGame/releases/tag/v3.8.5) (`MonoGame.Framework.DesktopGL`).
 
-## Installation
+## Building from source
 
 1. Clone the repository:
 
    ```bash
    git clone https://github.com/Asthegor/DinaCSharp.git
-2. Open the DinaCSharp.sln file in Visual Studio.
+   ```
 
+2. Open the `DinaCSharp.sln` file in Visual Studio.
 3. Restore the necessary NuGet packages.
 
 ## Usage
-Build the DinaCSharp project.
 
-Add the generated DinaCSharp.dll to your game project.
-
-Reference DinaCSharp.dll in your project.
-
-You can now use all framework features when developing your game.
+1. Add the `DinaCSharp` NuGet package to your game project. The `MonoGame.Framework.DesktopGL` package is installed automatically as a dependency.
+2. You can now use all framework features when developing your game.
 
 ## Documentation
 Detailed documentation is in progress.
 A first version is available here: [DinaCSharp Documentation](https://dinacsharp.lacombedominique.com/documentation/)
 
 ## Contributions
-Contributions are welcome. Please submit pull requests or open issues to report problems or suggest improvements.
+Contributions are welcome. Please open issues to report problems or suggest improvements.
 
 ## License
 This project is licensed under the MIT License.
