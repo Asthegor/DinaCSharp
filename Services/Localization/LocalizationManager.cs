@@ -114,10 +114,19 @@ namespace DinaCSharp.Services.Localization
         public static string GetTranslationForCulture(string key, string culture)
         {
             var previous = _currentCulture;
-            _currentCulture = new CultureInfo(culture);
-            var translation = GetTranslation(key);
-            _currentCulture = previous;
-            return translation;
+            try
+            {
+                _currentCulture = new CultureInfo(culture);
+                // The cache is keyed by key only: it must be emptied, otherwise the text of the
+                // previously requested language is returned for every culture.
+                _cache.Clear();
+                return GetTranslation(key);
+            }
+            finally
+            {
+                _currentCulture = previous;
+                _cache.Clear();
+            }
         }
 
         /// <summary>
