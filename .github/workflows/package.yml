@@ -1,0 +1,50 @@
+name: Package DinaCSharp
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  package:
+    runs-on: windows-latest
+    permissions:
+      contents: write   # gh release upload
+      id-token: write   # jeton OIDC pour le Trusted Publishing nuget.org
+
+    steps:
+      - name: Checkout (full history for MinVer)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Pack
+        run: dotnet pack DinaCSharp.csproj -c Release -o nupkg
+
+      - name: NuGet login (OIDC -> clé API temporaire)
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
+      - name: NuGet push
+        run: dotnet nuget push "nupkg/*.nupkg" --api-key ${{ steps.login.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+
+      - name: Upload package to release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          $package = (Get-ChildItem nupkg -Filter *.nupkg | Select-Object -First 1).FullName
+          # La Release est créée par release.yml, qui s'exécute en parallèle : on attend qu'elle existe (10 min max).
+          for ($i = 1; $i -le 60; $i++) {
+            gh release view $env:TAG *> $null
+            if ($LASTEXITCODE -eq 0) { break }
+            Start-Sleep -Seconds 10
+          }
+          gh release upload $env:TAG $package --clobber
