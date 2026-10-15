@@ -367,3 +367,4 @@ FodyWeavers.xsd
 /Documentation
 /Documentation.xml
 /Claude outputs
+!Services/Logs/
