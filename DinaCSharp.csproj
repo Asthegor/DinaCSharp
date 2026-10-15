@@ -2,18 +2,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
-        <SignAssembly>False</SignAssembly>
-        <Authors>Dominique LACOMBE</Authors>
+        <Authors>LACOMBE Dominique</Authors>
         <AnalysisLevel>latest-all</AnalysisLevel>
         <Title>DinaCSharp</Title>
-        <Description>DinaCSharp est un moteur de jeu personnalisé développé par Dominique LACOMBE et réalisé à partir de MonoGame.</Description>
+        <Description>DinaCSharp est un framework développé par LACOMBE Dominique et réalisé à partir de MonoGame.</Description>
         <NeutralLanguage>fr-FR</NeutralLanguage>
         <GenerateDocumentationFile>True</GenerateDocumentationFile>
         <Nullable>enable</Nullable>
-        <RootNamespace>DinaCSharp</RootNamespace>
-        <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
-        <Deterministic>false</Deterministic>
-        <Copyright>Copyright (c) 2022-2026 Dominique LACOMBE</Copyright>
+        <MinVerTagPrefix>v</MinVerTagPrefix>
+        <Copyright>Copyright (c) 2022-2026 LACOMBE Dominique</Copyright>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageProjectUrl>https://github.com/Asthegor/DinaCSharp</PackageProjectUrl>
@@ -23,30 +20,17 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
         <DebugType>none</DebugType>
-        <Optimize>False</Optimize>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
         <DebugType>none</DebugType>
     </PropertyGroup>
-    <PropertyGroup>
-        <MinVerTagPrefix>v</MinVerTagPrefix>
-    </PropertyGroup>
     <ItemGroup>
-        <Compile Remove=".config\**" />
-        <Compile Remove="Documentation\**" />
-        <EmbeddedResource Remove=".config\**" />
-        <EmbeddedResource Remove="Documentation\**" />
         <None Remove=".config\**" />
         <None Remove="Documentation\**" />
-    </ItemGroup>
-    <ItemGroup>
         <None Remove="Documentation.xml" />
-        <None Remove="minver.txt" />
-        <None Remove="minver2.txt" />
         <None Remove="Resources\CircleMask.png" />
         <None Remove="Resources\DropDownArrow.png" />
         <None Remove="Resources\Logo.png" />
-        <None Remove="TODO List.txt" />
     </ItemGroup>
     <ItemGroup>
         <EmbeddedResource Include="Resources\CircleMask.png" />
@@ -54,11 +38,7 @@
         <EmbeddedResource Include="Resources\Logo.png" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.5">
-            <PrivateAssets>All</PrivateAssets>
-        </PackageReference>
-    </ItemGroup>
-    <ItemGroup>
+        <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.5" />
         <PackageReference Include="MinVer" Version="7.0.0" PrivateAssets="all" />
     </ItemGroup>
     <ItemGroup>
@@ -75,13 +55,11 @@
         </EmbeddedResource>
     </ItemGroup>
     <ItemGroup>
-		<None Update="DLACrypto.dll">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-			<Pack>true</Pack>
-			<PackagePath>runtimes/win-x64/native/</PackagePath>
-		</None>
-	</ItemGroup>
-    <ItemGroup>
-        <None Include="README.md" Pack="true" PackagePath="\" />
+        <None Update="DLACrypto.dll">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+            <Pack>true</Pack>
+            <PackagePath>runtimes/win-x64/native/</PackagePath>
+        </None>
+        <None Update="README.md" Pack="true" PackagePath="\" />
     </ItemGroup>
 </Project>

@@ -1,5 +1,5 @@
 # DinaCSharp
-➡ [English version](#dinaframework-english)
+➡ [English version](#dinacsharp-english)
 
 DinaCSharp est un framework développé à partir de [MonoGame](https://github.com/MonoGame/MonoGame), conçu pour faciliter la création de jeux multiplateformes en C#.
 
@@ -27,7 +27,7 @@ DinaCSharp est un framework développé à partir de [MonoGame](https://github.c
 - [.NET 10](https://dotnet.microsoft.com/download/dotnet/10.0).
 - [MonoGame 3.8.5](https://github.com/MonoGame/MonoGame/releases/tag/v3.8.5) (`MonoGame.Framework.DesktopGL`).
 
-## Installation
+## Compilation depuis les sources
 
 1. Clonez le dépôt :
 
@@ -40,9 +40,8 @@ DinaCSharp est un framework développé à partir de [MonoGame](https://github.c
 
 ## Utilisation
 
-1. Ajoutez le projet `DinaCSharp` à votre solution.
-2. Ajoutez une référence au projet `DinaCSharp` dans votre projet de jeu.
-3. Vous n'avez plus qu'à utiliser les fonctionnalités du framework lors du développement de votre jeu.
+1. Ajoutez le package NuGet `DinaCSharp` à votre projet de jeu. Le package `MonoGame.Framework.DesktopGL` est installé automatiquement comme dépendance.
+2. Vous n'avez plus qu'à utiliser les fonctionnalités du framework lors du développement de votre jeu.
 
 ## Documentation
 La documentation détaillée est en cours de développement.
@@ -59,9 +58,9 @@ Si vous utilisez ces sources, merci de mentionner cette page dans les crédits d
 
 ---
 
-# DinaFramework (English)
+# DinaCSharp (English)
 
-DinaCSharp is a custom game engine built on top of [MonoGame](https://github.com/MonoGame/MonoGame), designed to simplify the creation of cross-platform games in C#.
+DinaCSharp is a framework built on top of [MonoGame](https://github.com/MonoGame/MonoGame), designed to simplify the creation of cross-platform games in C#.
 
 ## Features
 
@@ -87,7 +86,7 @@ DinaCSharp is a custom game engine built on top of [MonoGame](https://github.com
 - [.NET 10](https://dotnet.microsoft.com/download/dotnet/10.0).
 - [MonoGame 3.8.5](https://github.com/MonoGame/MonoGame/releases/tag/v3.8.5) (`MonoGame.Framework.DesktopGL`).
 
-## Installation
+## Building from source
 
 1. Clone the repository:
 
@@ -100,16 +99,15 @@ DinaCSharp is a custom game engine built on top of [MonoGame](https://github.com
 
 ## Usage
 
-1. Add the `DinaCSharp` project to your solution.
-2. Add a reference to the `DinaCSharp` project in your game project.
-3. You can now use all framework features when developing your game.
+1. Add the `DinaCSharp` NuGet package to your game project. The `MonoGame.Framework.DesktopGL` package is installed automatically as a dependency.
+2. You can now use all framework features when developing your game.
 
 ## Documentation
 Detailed documentation is in progress.
 A first version is available here: [DinaCSharp Documentation](https://dinacsharp.lacombedominique.com/documentation/)
 
 ## Contributions
-Contributions are welcome. Please submit pull requests or open issues to report problems or suggest improvements.
+Contributions are welcome. Please open issues to report problems or suggest improvements.
 
 ## License
 This project is licensed under the MIT License.
