@@ -12,10 +12,7 @@ namespace DinaCSharp.Graphics.Texts
     /// une instance <see cref="Text"/> interne pour l'ombre.
     /// </summary>
     /// <remarks>
-    /// Initialise un <see cref="ShadowText"/>.
-    /// </remarks>
-    /// <remarks>
-    /// Initialise une nouvelle instance de la classe ShadowText avec les paramètres spécifiés.
+    /// Initialise un <see cref="ShadowText"/> avec les paramètres spécifiés.
     /// </remarks>
     /// <param name="font">Police de caractères.</param>
     /// <param name="content">Contenu textuel.</param>
