@@ -13,6 +13,13 @@
         <RootNamespace>DinaCSharp</RootNamespace>
         <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
         <Deterministic>false</Deterministic>
+        <Copyright>Copyright (c) 2022-2026 Dominique LACOMBE</Copyright>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageProjectUrl>https://github.com/Asthegor/DinaCSharp</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/Asthegor/DinaCSharp.git</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>monogame;csharp;game</PackageTags>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
         <DebugType>none</DebugType>
@@ -74,4 +81,7 @@
 			<PackagePath>runtimes/win-x64/native/</PackagePath>
 		</None>
 	</ItemGroup>
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath="\" />
+    </ItemGroup>
 </Project>
