@@ -129,9 +129,8 @@ namespace DinaCSharp.Services.Screen
             _graphics.PreferredBackBufferHeight = height;
             _graphics.ApplyChanges();
             _currentResolution = new Point(_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
-            OnResolutionChanged?.Invoke(this, new ScreenManagerEventArgs(this));
-
             UIScaler.Update(_currentResolution.ToVector2());
+            OnResolutionChanged?.Invoke(this, new ScreenManagerEventArgs(this));
         }
 
         /// <summary>

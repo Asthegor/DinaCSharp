@@ -52,8 +52,10 @@ namespace DinaCSharp.Graphics.UI
         /// <param name="bordercolor">Couleur de la bordure du menu déroulant.</param>
         /// <param name="thickness">Épaisseur de la bordure.</param>
         /// <param name="nbvisibleoptions">Nombre d'options visibles à afficher par défaut.</param>
-        public DropDown(SpriteFont font, Vector2 position, Vector2 dimensions, IReadOnlyList<string> options, Color textcolor, Color selectedoptioncolor, Color backgroundcolor, Color bordercolor, Texture2D? arrowTexture = null, int thickness = 1, int nbvisibleoptions = 5)
-            : base(position, dimensions)
+        /// <param name="zorder"></param>
+        public DropDown(SpriteFont font, Vector2 position, Vector2 dimensions, IReadOnlyList<string> options, Color textcolor, Color selectedoptioncolor, Color backgroundcolor, Color bordercolor, 
+                        Texture2D? arrowTexture = null, int thickness = 1, int nbvisibleoptions = 5, int zorder = 0, int overlay = 1)
+            : base(position, dimensions, zorder)
         {
             ArgumentNullException.ThrowIfNull(arrowTexture);
             ArgumentNullException.ThrowIfNull(options);
@@ -68,7 +70,8 @@ namespace DinaCSharp.Graphics.UI
             _text = new Text(font, "", textcolor, position + new Vector2(thickness, thickness));
 
             Vector2 panelArrowPos = position + new Vector2(panelDim.X - arrowTexture.Width - thickness, 0);
-            _panelArrow = new Panel(panelArrowPos, new Vector2(arrowTexture.Width, Math.Max(dimensions.Y, arrowTexture.Height)), arrowTexture, 0);
+            _panelArrow = new Panel(panelArrowPos, new Vector2(arrowTexture.Width, Math.Max(dimensions.Y, arrowTexture.Height)), 
+                                                               arrowTexture, 0, zorder: overlay);
 
             foreach (string option in options)
             {
