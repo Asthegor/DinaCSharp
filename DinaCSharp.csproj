@@ -13,7 +13,7 @@
         <Copyright>Copyright (c) 2022-2026 LACOMBE Dominique</Copyright>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageReadmeFile>README.md</PackageReadmeFile>
-        <PackageProjectUrl>https://github.com/Asthegor/DinaCSharp</PackageProjectUrl>
+        <PackageProjectUrl>https://dinacsharp.lacombedominique.com/</PackageProjectUrl>
         <RepositoryUrl>https://github.com/Asthegor/DinaCSharp.git</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageTags>monogame;csharp;game</PackageTags>
