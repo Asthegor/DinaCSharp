@@ -1,16 +1,77 @@
 <Project>
-  <Target Name="PostBuildMoveSatelliteResources" AfterTargets="Build">
+  <!--
+    Regroupe les assemblys satellites (*.resources.dll) dans un dossier dédié
+    au lieu de laisser un dossier par culture (fr, en, es...) à la racine du jeu.
+      Build   : bin\<Configuration>\<TargetFramework>\Localization\<culture>\
+      Publish : <PublishDir>\Localization\<culture>\
+    Aucun dossier n'est créé si le projet n'a pas d'assembly satellite.
+    Le nom du dossier peut être changé avec la propriété LocalizationFolderName.
+    Ce nom est aussi écrit dans l'assembly du projet (attribut AssemblyMetadata
+    "DinaCSharp.LocalizationFolderName") : LocalizationManager le lit au démarrage
+    pour charger les assemblys satellites depuis ce dossier.
+  -->
+  <PropertyGroup>
+    <LocalizationFolderName Condition="'$(LocalizationFolderName)' == ''">Localization</LocalizationFolderName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>DinaCSharp.LocalizationFolderName</_Parameter1>
+      <_Parameter2>$(LocalizationFolderName)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <Target Name="MoveSatelliteAssembliesAfterBuild" AfterTargets="Build">
     <PropertyGroup>
-      <LocalizationDir>$(OutputPath)Localization\</LocalizationDir>
+      <_LocRootDir>$([MSBuild]::EnsureTrailingSlash('$([System.IO.Path]::GetFullPath('$(OutDir)'))'))</_LocRootDir>
     </PropertyGroup>
-	  <Exec Condition="!Exists('$(LocalizationDir)')" Command="mkdir $(LocalizationDir)" />
     <ItemGroup>
-      <SatelliteDlls Include="$(OutputPath)**\*.resources.dll" Exclude="$(LocalizationDir)**\*" />
+      <_LocSatellite Include="$(_LocRootDir)**\*.resources.dll"
+                     Exclude="$(_LocRootDir)$(LocalizationFolderName)\**" />
     </ItemGroup>
-    <Copy
-      SourceFiles="@(SatelliteDlls)"
-      DestinationFiles="@(SatelliteDlls->'$(LocalizationDir)%(RecursiveDir)%(Culture)\%(Filename)%(Extension)')"
-	  SkipUnchangedFiles="true" />
-    <RemoveDir Directories="@(SatelliteDlls->'%(RootDir)%(Directory)')" />
+    <Move Condition="'@(_LocSatellite)' != ''"
+          SourceFiles="@(_LocSatellite)"
+          DestinationFiles="@(_LocSatellite->'$(_LocRootDir)$(LocalizationFolderName)\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <ItemGroup>
+      <_LocCultureDir Include="@(_LocSatellite->'%(RootDir)%(Directory)'->Distinct())" />
+    </ItemGroup>
+    <ItemGroup>
+      <_LocCultureDir>
+        <Remaining>$([System.IO.Directory]::GetFiles('%(Identity)', '*', System.IO.SearchOption.AllDirectories))</Remaining>
+      </_LocCultureDir>
+    </ItemGroup>
+    <RemoveDir Condition="'@(_LocCultureDir)' != '' and '%(_LocCultureDir.Remaining)' == ''"
+               Directories="@(_LocCultureDir)" />
+    <ItemGroup>
+      <_LocSatellite Remove="@(_LocSatellite)" />
+      <_LocCultureDir Remove="@(_LocCultureDir)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="MoveSatelliteAssembliesAfterPublish" AfterTargets="Publish">
+    <PropertyGroup>
+      <_LocRootDir>$([MSBuild]::EnsureTrailingSlash('$([System.IO.Path]::GetFullPath('$(PublishDir)'))'))</_LocRootDir>
+    </PropertyGroup>
+    <ItemGroup>
+      <_LocSatellite Include="$(_LocRootDir)**\*.resources.dll"
+                     Exclude="$(_LocRootDir)$(LocalizationFolderName)\**" />
+    </ItemGroup>
+    <Move Condition="'@(_LocSatellite)' != ''"
+          SourceFiles="@(_LocSatellite)"
+          DestinationFiles="@(_LocSatellite->'$(_LocRootDir)$(LocalizationFolderName)\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <ItemGroup>
+      <_LocCultureDir Include="@(_LocSatellite->'%(RootDir)%(Directory)'->Distinct())" />
+    </ItemGroup>
+    <ItemGroup>
+      <_LocCultureDir>
+        <Remaining>$([System.IO.Directory]::GetFiles('%(Identity)', '*', System.IO.SearchOption.AllDirectories))</Remaining>
+      </_LocCultureDir>
+    </ItemGroup>
+    <RemoveDir Condition="'@(_LocCultureDir)' != '' and '%(_LocCultureDir.Remaining)' == ''"
+               Directories="@(_LocCultureDir)" />
+    <ItemGroup>
+      <_LocSatellite Remove="@(_LocSatellite)" />
+      <_LocCultureDir Remove="@(_LocCultureDir)" />
+    </ItemGroup>
   </Target>
 </Project>
